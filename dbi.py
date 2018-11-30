@@ -49,15 +49,20 @@ def getSearchedNewsSources(conn, searchTerm):
 
 
 def lookupUser(conn, uid):
-    """Extracts information about the user associated with the given ID. This
-    includes their name, access level (admin vs standard), and the list of news
-    sources the user is watching"""
+    """Extracts the user associated with the given ID and information about them,
+    including passoword hash??"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''QUERY TO GET USER INFO AND SOURCES THEY ARE WATCHING''', [uid])
+    curs.execute('''QUERY TO GET USER HERE''', [uid])
+    return curs.fetchone()
+    
+    
+def getWatchedNewsSources(conn, uid): 
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''QUERY TO GET SOURCES THAT USER IS WATCHING''', [uid])
     return curs.fetchall()
 
 if __name__ == '__main__':
-    conn = getConn('credbase')
+    conn = connect('credbase')
     
     
     

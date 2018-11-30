@@ -1,18 +1,28 @@
 {% extends "base.html" %}
 
 {% block main %}
-    <p>News sources that you watch</p>
-    <p>(was added to WMDB by {{ actor.addedby }})</p>
-    
-    <div id="info">
-        <p>News sources that you watch:</p>
-        <article>
-            <ol>
-                {% for movie in credits %}
-                <li> <a href="{{movie.href}}">{{ movie.title }}</a>  ({{ movie.release }})</li>
-                {% endfor %}
-            </ol>
-        </article>
+    <div>
+        <p>Here are the news sources on your watchlist</p>
+        
+        <table id="watchlist">
+            
+            <tr>
+                <th>Name</th>
+                <th>Watching since</th>
+            </tr>
+            
+            <!-- Fills out movie table --> 
+            {% for item in sources %}
+                <tr data-id={{item.nsid}}>
+                <td class="name">{{item.name}}</td>
+                <td class="date">{{item.addDate}}</td>
+                <td><button class="unwatch">Stop watching</button></td>
+            </tr>
+            {% endfor %}
+           
+        </table>
+        
     </div>
+    
     
 {% endblock %}

@@ -42,20 +42,27 @@ def newsSource(nsid):
 """User information"""
 @app.route('/user/<int:uid>')
 def user(uid):
+    # return render_template('user_page.html', page_title="Khonzoda", sources=[{'name':'cnn.com', 'addDate':'11-28-2018'}, 
+    #                                                                          {'name':'snopes.com', 'addDate':'11-28-2018'}])
     conn = dbi.connect('credbase')
     user_info = dbi.lookupUser(conn, uid)
     if len(user_info) == 0:
         return render_template('notfound_page.html', msg="Sorry, no user with this ID exists")
     else:
-        return render_template('user_page.html', page_title=user_info['name'])
+        sources = dbi.getWatchedNewsSources(conn, uid)
+        return render_template('user_page.html', page_title=user_info['name'], sources=sources)
+        
         
         
 @app.route('/source/search/', defaults={'search_term':''})
 @app.route('/source/search/<search_term>')
 def newsSourceSearchResults(search_term):
-    conn = dbi.connect('credbase')
-    sources = dbi.getSearchedNewsSources(conn, search_term)
-    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", sources=sources)
+    return render_template('searched_sources_page.html', page_title="Search results for: 'daily'", 
+                            search_results=[{'name':'Daily Mail', 'url':'https://www.dailymail.co.uk'}, 
+                                            {'name':'The Daily Beast', 'url':'https://www.thedailybeast.com/'}])
+    # conn = dbi.connect('credbase')
+    # search_results = dbi.getSearchedNewsSources(conn, search_term)
+    # return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results)
     
         
 @app.route('/search/', methods=['GET', 'POST'])
