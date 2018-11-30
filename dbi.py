@@ -17,8 +17,7 @@ def connect(db):
     # cnf['db'] = db
     # conn = MySQLdb.connect(**cnf)
     #I NEED TO FIGURE OUT HOW TO DO **CNF THING
-    conn = MySQLdb.connect(host='localhost',
-                          user='kumarova',
+    conn = MySQLdb.connect(user='user', host='localhost',
                           passwd='',
                           db=db)
     conn.autocommit(True)
@@ -29,14 +28,21 @@ def lookupNewsSource(conn, nsid):
     """Extracts a news source associated with the given ID. If no such
     news source exists, None is returned"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''QUERY TO GET NEWS SOURCE HERE''', [nsid])
+    curs.execute('''select * from newsSource where nsid = %s''', [nsid])
+    return curs.fetchone()
+    
+def getSimilar(conn, nsid):
+    """Extracts a news source associated with the given ID. If no such
+    news source exists, None is returned"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from similar where nsid1 = %s or nsid2 = %s''', [nsid, nsid])
     return curs.fetchone()
     
    
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''QUERY TO GET SEARCH RESULTS FOR THIS SOURCE HERE''')
+    curs.execute('''select * from searchresults where nsid = %s''', [nsid])
     return curs.fetchall()
     
     
@@ -44,7 +50,7 @@ def getSearchedNewsSources(conn, searchTerm):
     """Searches the database for a news source that matches the name provided"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     pattern = '%' + searchTerm + '%'
-    curs.execute('''QUERY TO SEARCH FOR NEWS SOURCE HERE''', [pattern])
+    curs.execute('''select * from newsSource where name like %s''', [pattern])
     return curs.fetchall()
 
 
@@ -52,13 +58,13 @@ def lookupUser(conn, uid):
     """Extracts the user associated with the given ID and information about them,
     including passoword hash??"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''QUERY TO GET USER HERE''', [uid])
+    curs.execute('''select * from user where uid = %s''', [uid])
     return curs.fetchone()
     
     
 def getWatchedNewsSources(conn, uid): 
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''QUERY TO GET SOURCES THAT USER IS WATCHING''', [uid])
+    curs.execute('''select * from watching where uid = %s''', [uid])
     return curs.fetchall()
 
 if __name__ == '__main__':

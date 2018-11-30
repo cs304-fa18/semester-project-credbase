@@ -4,6 +4,20 @@
 
 <div>
     <p>Here we will have more info about the news source...</p>
+    <p>Date established: {{newsSource.doe}}</p>
+    <p>Type: {{newsSource.type}}</p>
+    <p>Publisher: {{newsSource.publisher}}</p>
+    <p>Location: {{newsSource.location}}</p>
+    <p>Editor: {{newsSource.editor}}</p>
+    <p>Information about the news source:</p>
+    <p>Writes about:</p>
+    <p>{% for story in stories%}</p>
+    <p>{{ story.title }}</p>
+    <p>{% endfor %}</p>
+    <p>Is similar to:</p>
+    <p>{% for source in similar%}</p>
+    <p>{{ source.name }}</p>
+    <p>{% endfor %}</p>
 </div>
 
 {% endblock %}
