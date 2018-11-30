@@ -36,7 +36,7 @@ def newsSource(nsid):
         return render_template('notfound_page.html', msg="Sorry, no news source with this ID is in the database")
     else:
         stories = dbi.getStoriesByNewsSource(conn, nsid)
-        return render_template('news_source_page.html', page_title=source['name'], stories=stories)
+        return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories)
 
 
 """User information"""
@@ -58,16 +58,22 @@ def user(uid):
 @app.route('/source/search/<search_term>')
 def newsSourceSearchResults(search_term):
     if search_term == "daily":
+        flash("This is how the output would look like if there are multiple results matching the search term")
         return render_template('searched_sources_page.html', page_title="Search results for: 'daily'", 
                             search_results=[{'name':'Daily Mail', 'url':'https://www.dailymail.co.uk'}, 
                                             {'name':'The Daily Beast', 'url':'https://www.thedailybeast.com/'}])
-    if search_term == "cnn":
+    elif search_term == "cnn":
         conn = dbi.connect('credbase')
         newsSource = dbi.lookupNewsSource(conn, "1")
         stories = dbi.getStoriesByNewsSource(conn, "1")
         similar = dbi.getSimilar(conn, "1")
         return render_template('news_source_page.html', page_title="Searched results for: 'cnn'",
                             newsSource = newsSource, stories = stories, similar = similar)
+                            
+    else:
+        flash("Currently there are only two canned queries implemented so far: 'cnn' or 'daily'")
+        return render_template('news_source_page.html', page_title="Searched results for: '"+search_term+"'",
+                                search_results=[])
     # conn = dbi.connect('credbase')
     # search_results = dbi.getSearchedNewsSources(conn, search_term)
     # return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results)

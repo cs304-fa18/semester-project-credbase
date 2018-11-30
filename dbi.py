@@ -17,7 +17,7 @@ def connect(db):
     # cnf['db'] = db
     # conn = MySQLdb.connect(**cnf)
     #I NEED TO FIGURE OUT HOW TO DO **CNF THING
-    conn = MySQLdb.connect(user='user', host='localhost',
+    conn = MySQLdb.connect(user='kumarova', host='localhost',
                           passwd='',
                           db=db)
     conn.autocommit(True)
@@ -69,7 +69,8 @@ def getWatchedNewsSources(conn, uid):
 
 if __name__ == '__main__':
     conn = connect('credbase')
-    
+    result = getWatchedNewsSources(conn, "123")
+    print(len(result))
     
     
 

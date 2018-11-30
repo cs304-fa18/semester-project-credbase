@@ -1,4 +1,4 @@
-% extends "base.html" %}
+{% extends "base.html" %}
 {% block main %}
 <br>
 
@@ -11,13 +11,33 @@
     <p>Editor: {{newsSource.editor}}</p>
     <p>Information about the news source:</p>
     <p>Writes about:</p>
-    <p>{% for story in stories%}</p>
-    <p>{{ story.title }}</p>
-    <p>{% endfor %}</p>
+    <table id="stories">
+            <tr>
+                <th>Title</th>
+                <th>Associated query</th>
+                <th>Date</th>
+            </tr>
+            <!-- Fills out the table --> 
+            {% for story in stories %}
+                <tr data-id={{story.sid}}>
+                    <td class="title"><a href="{{story.url}}">{{story.title}}</td>
+                    <td class="query">{{story.originQuery}}</td>
+                    <td class="date">{{story.resultDate}}</td>
+                </tr>
+            {% endfor %}
+           
+        </table>
+    <!--<p>{% for story in stories%}</p>-->
+    <!--<p>{{ story.title }}</p>-->
+    <!--<p>{% endfor %}</p>-->
     <p>Is similar to:</p>
-    <p>{% for source in similar%}</p>
-    <p>{{ source.name }}</p>
-    <p>{% endfor %}</p>
+    <article id="similar">
+        <ul>
+            {% for source in search_results %}
+            <li><a href="{{source.url}}">{{ source.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </article>
 </div>
 
 {% endblock %}
