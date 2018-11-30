@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<br>
+
+
+
+<div id="featured-movie" style="">
+    
+    <h1>Featured movie: # <span id="tt"></span></h1>
+    <h2>Title: <span id="title"></span></h2>
+    <h2>Directed by: <span id="director"></span></h2>
+    <h2>Release date: <span id="release"></span></h2>
+    
+</div>
+
+<h2>{{text}}</h2>
+
+
+<p>This sets the userid of the person doing the rating. This form substitutes for a proper login
+<!--<form action="/cs304ajax/setUID" method="POST">-->
+<form action={{url_for('login')}} method="POST">
+<input type="text" name="uid" placeholder="12">
+</form></p>
+
+<p>This button turns on/off all the JavaScript: <button id="progressive_enhancement">Turn On Progressive Enhancement</button>
+
+
+<h1>List of Movies</h1>
+
+<table id="movies-list">
+    
+    <tr>
+        <th>Title</th>
+        <th>Director</th>
+        <th>Release</th>
+        <th>Feature</th>
+        <th>My rating</th>
+        <th>Average</th>
+    </tr>
+    
+    <!-- Fills out movie table --> 
+    {% for item in movies %}
+        <tr data-tt={{item.tt}}>
+        <td class="title">{{item.title}}</td>
+        <td class="director">{{item.name}}</td>
+        <td class="release">{{item.release}}</td>
+        <td><button class="feature-button">Feature this!</button></td>
+        
+        <!--<td><form method="post" action={{url_for('rateMovie')}}>-->
+        <td><form method="post" action=''>
+            <input type="hidden" name="tt" value={{item.tt}}>
+            <label class="movie-rating">1 <input type="radio" name="stars" value="1"></label>
+            <label class="movie-rating">2 <input type="radio" name="stars" value="2"></label>
+            <label class="movie-rating">3 <input type="radio" name="stars" value="3"></label>
+            <label class="movie-rating">4 <input type="radio" name="stars" value="4"></label>
+            <label class="movie-rating">5 <input type="radio" name="stars" value="5"></label>
+            <input id="ajax_button" type="button" value="rate this">
+            <!--<input type="submit" value="rate this">-->
+            </form>
+        </td>
+        <td><span class="avg_rating">{{item.avg_rating}}</span></td>
+    </tr>
+    {% endfor %}
+   
+</table>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script src="{{url_for('static', filename='features.js')}}"></script>
+
+{% endblock %}
+

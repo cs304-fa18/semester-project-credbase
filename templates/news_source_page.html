@@ -1,0 +1,18 @@
+
+    <h1 class="movie">{{ movie.title }}</h1>
+    
+    <p>{{ movie.title }} was released in <b>{{ movie.release }}</b>.</p>
+    <p></p>
+
+    <div id="info">
+        <p>Here is the cast of <b>{{ movie.title }}</b>:</p>
+        <article>
+            <ol>
+                {% for actor in cast %}
+                <li> <a href="{{ actor.href }}">{{ actor.name }}</a></li>
+                {% endfor %}
+            </ol>
+        </article>
+    </div>
+    </body>
+</html>

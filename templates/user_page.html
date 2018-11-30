@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <p>News sources that you watch</p>
+    <p>(was added to WMDB by {{ actor.addedby }})</p>
+    
+    <div id="info">
+        <p>News sources that you watch:</p>
+        <article>
+            <ol>
+                {% for movie in credits %}
+                <li> <a href="{{movie.href}}">{{ movie.title }}</a>  ({{ movie.release }})</li>
+                {% endfor %}
+            </ol>
+        </article>
+    </div>
+    
+{% endblock %}

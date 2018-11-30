@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/static/styles.css">
+        <meta name=author content="Khonzoda Umarova & Annabel Rothschilda">
+        <title></title>
+    </head>
+    <body>
+     
+    {% block header %}   
+    <table id="header" width="100%">
+        <tr>
+            <th>
+                <form id="search" method=POST action= {{url_for('search')}}>
+                <input id="searchterm" placeholder="Search" name="searchterm">
+                <button id="searchbutton" type="submit" name="submit" value="Search">Search</button>
+                </form>
+            </th>
+            <th>
+                <h3 class="logo">CRED base</h3>
+            </th>
+            <th>
+                <h4 class='login_session'>{{ login_session }}</h4>
+            </th>
+        </tr>
+    </table>
+    {% endblock  %}
+    
+    {% block title %}
+    <h1 class="title">{{ page_title }}</h1>
+    {% endblock  %}
+    
+    
+    {% block flashes%}
+    <div id="flashes">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    </div>
+    {% endblock  %}
+    
+    
+    {% block main %} 
+    {% endblock  %}
+    
+
+    </body>
+    </html>
