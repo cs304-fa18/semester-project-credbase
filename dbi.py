@@ -17,7 +17,7 @@ def connect(db):
     # cnf['db'] = db
     # conn = MySQLdb.connect(**cnf)
     #I NEED TO FIGURE OUT HOW TO DO **CNF THING
-    conn = MySQLdb.connect(user='ubuntu', host='localhost',
+    conn = MySQLdb.connect(user='kumarova', host='localhost',
                           passwd='',
                           db=db)
     conn.autocommit(True)

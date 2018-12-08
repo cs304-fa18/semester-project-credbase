@@ -52,10 +52,10 @@ def user(username):
             return render_template('user_page.html', page_title=user_info['name'], sources=sources, login_session=session.get('name', 'Not logged in'))
         else:
             flash('you are not logged in. Please login or join')
-            return redirect( url_for('index') )
+            return redirect( url_for('home') )
     except Exception as err:
         flash('some kind of error '+str(err))
-        return redirect( url_for('index') )
+        return redirect( url_for('home') )
 
         
         
@@ -87,6 +87,8 @@ def join():
         hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
         conn = dbi.connect('credbase')
         result = dbi.checkUserPass(conn, username)
+        
+        #NEED TO ADD THREAD SAFE MODIFICATIONS HERE
         if result is not None:
             #WE COULD USE AJAX HERE
             flash('That username is taken')
