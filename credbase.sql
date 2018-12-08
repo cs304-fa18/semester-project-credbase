@@ -58,22 +58,22 @@ CREATE TABLE wikipedia (
 
 -- drop table if exists user;
 CREATE TABLE user(
-    uid int auto_increment,
     name varchar(60),
+    username varchar(10),
     access enum("admin", "regular"),
     hashedPWD varchar(60),
-    primary key (uid)
+    primary key (username)
 ) ENGINE=InnoDB;
 
 
 -- drop table if exists watching;
 CREATE TABLE watching(
     nsid int not null,
-    uid int not null,
+    username varchar(10),
     addDate date,
-    primary key (uid, nsid),
+    primary key (username, nsid),
     foreign key (nsid) references newsSource(nsid) on delete cascade,
-    foreign key (uid) references user(uid) on delete cascade
+    foreign key (username) references user(username) on delete cascade
 ) ENGINE=InnoDB;
 
 
@@ -98,3 +98,5 @@ insert into alexa(globalrank, numLinksIn, numLinksOut, nsid) values (102, 177446
 insert into wikipedia(url, name, nsid) values ("https://en.wikipedia.org/wiki/CNN", "CNN", 1);
 
 insert into similar(nsid1, nsid2) values (1, 2);
+
+-- insert into user(name, username, access,)

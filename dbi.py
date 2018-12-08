@@ -30,6 +30,7 @@ def lookupNewsSource(conn, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from newsSource where nsid = %s''', [nsid])
     return curs.fetchone()
+   
     
 def getSimilar(conn, nsid):
     """Extracts a news source associated with the given ID. If no such
@@ -58,14 +59,26 @@ def lookupUser(conn, uid):
     """Extracts the user associated with the given ID and information about them,
     including passoword hash??"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from user where uid = %s''', [uid])
+    curs.execute('''select * from user where username = %s''', [uid])
     return curs.fetchone()
     
     
 def getWatchedNewsSources(conn, uid): 
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from watching where uid = %s''', [uid])
+    curs.execute('''select * from watching where username = %s''', [uid])
     return curs.fetchall()
+
+
+def checkUserPass(conn, username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select hashedPWD, name from user where username = %s''',
+                     [username])
+    return curs.fetchone()
+    
+def addUser(conn, name, username, hashed):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''insert into user(name,username,access,hashedPWD) values(%s,%s,'regular',%s)''',
+                     [name, username, hashed])
 
 if __name__ == '__main__':
     conn = connect('credbase')
@@ -73,4 +86,3 @@ if __name__ == '__main__':
     print(len(result))
     
     
-
