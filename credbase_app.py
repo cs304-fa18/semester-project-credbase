@@ -25,19 +25,6 @@ app.secret_key = "a very secret phrase"
 @app.route('/')
 def home():
     return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
-    
-    
-"""News source information"""    
-@app.route('/source/<int:nsid>')
-def newsSource(nsid):
-    conn = dbi.connect('credbase')
-    source = dbi.lookupNewsSource(conn, nsid)
-    if source is None:
-        return render_template('notfound_page.html', msg="Sorry, no news source with this ID is in the database", login_session=session.get('name', 'Not logged in'))
-    else:
-        stories = dbi.getStoriesByNewsSource(conn, nsid)
-        return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
-
 
 """User information"""
 @app.route('/user/<username>')
@@ -57,21 +44,45 @@ def user(username):
         flash('some kind of error '+str(err))
         return redirect( url_for('home') )
 
-        
-        
-@app.route('/source/search/', defaults={'search_term':''})
-@app.route('/source/search/<search_term>')
-def newsSourceSearchResults(search_term):
-    conn = dbi.connect('credbase')
-    search_results = dbi.getSearchedNewsSources(conn, search_term)
-    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
     
+    
+    
+"""News source information"""    
+@app.route('/source/<int:nsid>')
+def newsSource(nsid):
+    conn = dbi.connect('credbase')
+    source = dbi.lookupNewsSource(conn, nsid)
+    if source == None:
+        flash("Sorry, no news source with this ID is in the database")
+        #We need to create not found page or something...
+        return redirect( url_for('home') )
+    else:
+        stories = dbi.getStoriesByNewsSource(conn, nsid)
+        return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
+
+        
 @app.route('/search/', methods=['GET', 'POST'])
 def search():
     '''Redirects to the page with news source search results'''
     search_term = request.form.get("searchterm")
     return redirect(url_for('newsSourceSearchResults', search_term=search_term))
     
+
+@app.route('/source/search/', defaults={'search_term':''})
+@app.route('/source/search/<search_term>')
+def newsSourceSearchResults(search_term):
+    """This page displays search results when there are multiple results that
+    satisfy the search query. If there is only one, it redirects to the page
+    of this news source. If there are none, it flashes the message"""
+    conn = dbi.connect('credbase')
+    search_results = dbi.getSearchedNewsSources(conn, search_term)
+    if len(search_results) == 1:
+        return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
+    elif len(search_results) == 0:
+        flash('Sorry, no news source with such name was found')
+    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
+  
+
 
 ##-------------------# Pages for session/login management #-------------------##
 @app.route('/login/', methods = ['POST'])
