@@ -73,7 +73,53 @@ def search():
     return redirect(url_for('newsSourceSearchResults', search_term=search_term))
     
 
-#NEED TO DEFINE LOGINS & SIGNUPS
+##-------------------# Pages for session/login management #-------------------##
+@app.route('/login/', methods = ['POST'])
+def login():
+    try:
+        username = request.form['username']
+        passwd = request.form['password']
+        conn = dbi.connect('credbase')
+        result = dbi.checkUserPass(conn, username)
+        
+        if result is None:
+            # Same response as wrong password, so no information about what went wrong
+            flash('login incorrect. Try again or join')
+            return redirect( url_for('home'))
+            
+        hashed = result['hashedPWD']
+        name = result['name']
+        # strings always come out of the database as unicode objects
+        
+        if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+            flash('successfully logged in as '+username)
+            session['username'] = username
+            session['name'] = name
+            return redirect( url_for('user', username=username) )
+        else:
+            flash('login incorrect. Try again or join')
+            return redirect( url_for('home'))
+    except Exception as err:
+        flash('form submission error '+str(err))
+        return redirect( url_for('home') )
+        
+
+@app.route('/logout/', methods = ['POST'])
+def logout():
+    try:
+        if 'username' in session:
+            session.pop('username')
+            session.pop('name')
+            flash('You are logged out')
+            return redirect(url_for('home'))
+        else:
+            flash('you are not logged in. Please login or join')
+            return redirect( url_for('home') )
+    except Exception as err:
+        flash('some kind of error '+str(err))
+        return redirect( url_for('home') )
+
+
 @app.route('/join/', methods = ['POST'])
 def join():
     try:
@@ -105,57 +151,8 @@ def join():
         return redirect( url_for('home') )
     
     
-    
-@app.route('/login/', methods = ['POST'])
-def login():
-    try:
-        username = request.form['username']
-        passwd = request.form['password']
-        conn = dbi.connect('credbase')
-        result = dbi.checkUserPass(conn, username)
-        
-        if result is None:
-            # Same response as wrong password, so no information about what went wrong
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
-            
-        hashed = result['hashedPWD']
-        name = result['name']
-        # strings always come out of the database as unicode objects
-        
-        if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
-            flash('successfully logged in as '+username)
-            session['username'] = username
-            session['name'] = name
-            return redirect( url_for('user', username=username) )
-        else:
-            flash('login incorrect. Try again or join')
-            return redirect( url_for('home'))
-    except Exception as err:
-        flash('form submission error '+str(err))
-        return redirect( url_for('home') )
 
 
-
-
-# @app.route('/logout/')
-# def logout():
-#     try:
-#         if 'username' in session:
-#             username = session['username']
-#             session.pop('username')
-#             session.pop('logged_in')
-#             flash('You are logged out')
-#             return redirect(url_for('index'))
-#         else:
-#             flash('you are not logged in. Please login or join')
-#             return redirect( url_for('index') )
-#     except Exception as err:
-#         flash('some kind of error '+str(err))
-#         return redirect( url_for('index') )
-
-
-    
 if __name__ == '__main__':
     app.debug = True
     app.run('0.0.0.0',8081)
