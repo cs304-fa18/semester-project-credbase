@@ -57,27 +57,31 @@ def user(uid):
 @app.route('/source/search/', defaults={'search_term':''})
 @app.route('/source/search/<search_term>')
 def newsSourceSearchResults(search_term):
-    if search_term == "daily":
-        flash("This is how the output would look like if there are multiple results matching the search term")
-        return render_template('searched_sources_page.html', page_title="Search results for: 'daily'", 
-                            search_results=[{'name':'Daily Mail', 'url':'https://www.dailymail.co.uk'}, 
-                                            {'name':'The Daily Beast', 'url':'https://www.thedailybeast.com/'}])
-    elif search_term == "cnn":
-        conn = dbi.connect('credbase')
-        newsSource = dbi.lookupNewsSource(conn, "1")
-        stories = dbi.getStoriesByNewsSource(conn, "1")
-        similar = dbi.getSimilar(conn, "1")
-        return render_template('news_source_page.html', page_title="Searched results for: 'cnn'",
-                            newsSource = newsSource, stories = stories, similar = similar)
-                            
-    else:
-        flash("Currently there are only two canned queries implemented so far: 'cnn' or 'daily'")
+    try:
+        if search_term == "daily":
+            flash("This is how the output would look like if there are multiple results matching the search term")
+            return render_template('searched_sources_page.html', page_title="Search results for: 'daily'", 
+                                search_results=[{'name':'Daily Mail', 'url':'https://www.dailymail.co.uk'}, 
+                                                {'name':'The Daily Beast', 'url':'https://www.thedailybeast.com/'}])
+        elif search_term == "cnn":
+            conn = dbi.connect('credbase')
+            newsSource = dbi.lookupNewsSource(conn, "1")
+            stories = dbi.getStoriesByNewsSource(conn, "1")
+            similar = dbi.getSimilar(conn, "1")
+            return render_template('news_source_page.html', page_title="Searched results for: 'cnn'",
+                                newsSource = newsSource, stories = stories, similar = similar)
+                                
+        else:
+            flash("Currently there are only two canned queries implemented so far: 'cnn' or 'daily'")
+            return render_template('news_source_page.html', page_title="Searched results for: '"+search_term+"'",
+                                    search_results=[])
+        # conn = dbi.connect('credbase')
+        # search_results = dbi.getSearchedNewsSources(conn, search_term)
+        # return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results)
+    except Exception as err:
+        flash('error!'+str(err))
         return render_template('news_source_page.html', page_title="Searched results for: '"+search_term+"'",
-                                search_results=[])
-    # conn = dbi.connect('credbase')
-    # search_results = dbi.getSearchedNewsSources(conn, search_term)
-    # return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results)
-    
+                                    search_results=[])
         
 @app.route('/search/', methods=['GET', 'POST'])
 def search():

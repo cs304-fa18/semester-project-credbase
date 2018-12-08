@@ -1,0 +1,360 @@
+#!/usr/bin/python2.7
+
+"""
+Flask application that manages CRED database
+----------------------------------------------------------------
+Khonzoda Umarova & Annabel Rothschild
+CS 304 - Databases 
+Final Project 
+October, 2018
+"""
+
+
+from flask import (Flask, url_for, redirect, request, render_template, session, 
+                   flash, jsonify)
+#import python files that do the lookup
+import dbi
+ 
+app = Flask(__name__)
+app.secret_key = "a very secret phrase"
+ 
+ 
+ 
+ 
+"""Home page"""
+@app.route('/')
+def home():
+    return render_template("home_page.html", page_title="Welcome to CRED base!", login_session="Logged in as Khonzoda")
+    
+    
+"""News source information"""    
+@app.route('/source/<int:nsid>')
+def newsSource(nsid):
+    conn = dbi.connect('credbase')
+    source = dbi.lookupNewsSource(conn, nsid)
+    if source is None:
+        return render_template('notfound_page.html', msg="Sorry, no news source with this ID is in the database")
+    else:
+        stories = dbi.getStoriesByNewsSource(conn, nsid)
+        return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories)
+
+
+"""User information"""
+@app.route('/user/<int:uid>')
+def user(uid):
+    # return render_template('user_page.html', page_title="Khonzoda", sources=[{'name':'cnn.com', 'addDate':'11-28-2018'}, 
+    #                                                                          {'name':'snopes.com', 'addDate':'11-28-2018'}])
+    conn = dbi.connect('credbase')
+    user_info = dbi.lookupUser(conn, uid)
+    if len(user_info) == 0:
+        return render_template('notfound_page.html', msg="Sorry, no user with this ID exists")
+    else:
+        sources = dbi.getWatchedNewsSources(conn, uid)
+        return render_template('user_page.html', page_title=user_info['name'], sources=sources)
+        
+        
+        
+@app.route('/source/search/', defaults={'search_term':''})
+@app.route('/source/search/<search_term>')
+def newsSourceSearchResults(search_term):
+    try:
+        if search_term == "daily":
+            flash("This is how the output would look like if there are multiple results matching the search term")
+            return render_template('searched_sources_page.html', page_title="Search results for: 'daily'", 
+                                search_results=[{'name':'Daily Mail', 'url':'https://www.dailymail.co.uk'}, 
+                                                {'name':'The Daily Beast', 'url':'https://www.thedailybeast.com/'}])
+        elif search_term == "cnn":
+            conn = dbi.connect('credbase')
+            newsSource = dbi.lookupNewsSource(conn, "1")
+            stories = dbi.getStoriesByNewsSource(conn, "1")
+            similar = dbi.getSimilar(conn, "1")
+            return render_template('news_source_page.html', page_title="Searched results for: 'cnn'",
+                                newsSource = newsSource, stories = stories, similar = similar)
+                                
+        else:
+            flash("Currently there are only two canned queries implemented so far: 'cnn' or 'daily'")
+            return render_template('news_source_page.html', page_title="Searched results for: '"+search_term+"'",
+                                    search_results=[])
+        # conn = dbi.connect('credbase')
+        # search_results = dbi.getSearchedNewsSources(conn, search_term)
+        # return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results)
+    except Exception as err:
+        flash('error!'+str(err))
+        return render_template('news_source_page.html', page_title="Searched results for: '"+search_term+"'",
+                                    search_results=[])
+        
+@app.route('/search/', methods=['GET', 'POST'])
+def search():
+    '''Redirects to the page with news source search results'''
+    search_term = request.form.get("searchterm")
+    return redirect(url_for('newsSourceSearchResults', search_term=search_term))
+    
+
+#NEED TO DEFINE LOGINS & SIGNUPS
+@app.route('/join/')
+def signup():
+    return redirect(request.referrer) 
+    
+@app.route('/login/', methods = ['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        session['username'] = request.form.get('uid')
+        #return redirect(url_for('movies', serachTerm=session.get('searchTerm', '')))
+        return redirect(request.referrer)     
+
+     
+if __name__ == '__main__':
+    app.debug = True
+    app.run('0.0.0.0',8081)"""
+Python script that connects to the database
+--------------------------------------------------
+Khonzoda Umarova & Annabel Rothschild
+CS 304 - Databases 
+Final Project 
+Fall 2018
+"""
+import sys
+import MySQLdb
+# import dbconn2
+
+def connect(db):
+    """Establishes a connection with the
+    given database"""
+    # cnf = dbconn2.read_cnf()
+    # cnf['db'] = db
+    # conn = MySQLdb.connect(**cnf)
+    #I NEED TO FIGURE OUT HOW TO DO **CNF THING
+    conn = MySQLdb.connect(user='ubuntu', host='localhost',
+                          passwd='',
+                          db=db)
+    conn.autocommit(True)
+    return conn
+ 
+ 
+def lookupNewsSource(conn, nsid):
+    """Extracts a news source associated with the given ID. If no such
+    news source exists, None is returned"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from newsSource where nsid = %s''', [nsid])
+    return curs.fetchone()
+    
+def getSimilar(conn, nsid):
+    """Extracts a news source associated with the given ID. If no such
+    news source exists, None is returned"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from similar where nsid1 = %s or nsid2 = %s''', [nsid, nsid])
+    return curs.fetchone()
+    
+   
+def getStoriesByNewsSource(conn, nsid):   
+    """Extracts stories/search results that come from the given news source"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from searchresults where nsid = %s''', [nsid])
+    return curs.fetchall()
+    
+    
+def getSearchedNewsSources(conn, searchTerm):
+    """Searches the database for a news source that matches the name provided"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    pattern = '%' + searchTerm + '%'
+    curs.execute('''select * from newsSource where name like %s''', [pattern])
+    return curs.fetchall()
+
+
+def lookupUser(conn, uid):
+    """Extracts the user associated with the given ID and information about them,
+    including passoword hash??"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from user where uid = %s''', [uid])
+    return curs.fetchone()
+    
+    
+def getWatchedNewsSources(conn, uid): 
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from watching where uid = %s''', [uid])
+    return curs.fetchall()
+
+if __name__ == '__main__':
+    conn = connect('credbase')
+    result = getWatchedNewsSources(conn, "123")
+    print(len(result))
+    
+    
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="/static/styles.css">
+        <meta name=author content="Khonzoda Umarova & Annabel Rothschilda">
+        <title></title>
+    </head>
+    <body>
+     
+    {% block header %}   
+    <table id="header" width="100%">
+        <tr>
+            <th>
+                <form id="search" method=POST action= {{url_for('search')}}>
+                <input id="searchterm" placeholder="Search" name="searchterm">
+                <button id="searchbutton" type="submit" name="submit" value="Search">Search</button>
+                </form>
+            </th>
+            <th>
+                <h3 class="logo">CRED base</h3>
+            </th>
+            <th>
+                <h4 class='login_session'>{{ login_session }}</h4>
+            </th>
+            <th>
+                <button id="logout">logout</button>
+            </th>
+        </tr>
+    </table>
+    {% endblock  %}
+    
+    {% block title %}
+    <h1 class="title">{{ page_title }}</h1>
+    {% endblock  %}
+    
+    
+    {% block flashes%}
+    <div id="flashes">
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+        {% endif %}
+    {% endwith %}
+    </div>
+    {% endblock  %}
+    
+    
+    {% block main %} 
+    {% endblock  %}
+    
+
+    </body>
+    </html>{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <form id="loginform" action={{url_for('login')}} method="post">
+            <h3>Login to CRED base</h3>
+            <p><label>Username: <input type="text" name="username" required pattern="^\w+$"></label></p>
+            <p><label>Password: <input type="password" name="password" required></label></p>
+            <p><button type="submit">Submit</button></p>
+        </form>
+    </div>
+    
+    <div>
+        <form id="joinform" action={{url_for('signup')}} method="post">
+            <h3>Or alternatively join CRED base</h3>
+            <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
+            <p><label><input type="password" name="password1" required> Password </label></p>
+            <p><label><input type="password" name="password2" required> Password again </label></p>
+            <p><button type="submit">Submit</button></p>
+        </form>
+    </div>
+    
+    
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script>
+    /*global $*/
+    $("#joinform").on('submit', function (event) {
+         var pw1 = $(this).find('[name=password1]').val();
+         var pw2 = $(this).find('[name=password2]').val();
+         // should also check for length and common words etc
+         if( pw1 != pw2 ) {
+             // something more sophisticated than alert would be nice
+             alert("passwords don't match");
+         }
+    });
+    </script>
+
+{% endblock %}
+ {% extends "base.html" %}
+{% block main %}
+<br>
+
+<div>
+    <p>Here we will have more info about the news source...</p>
+    <p>Date established: {{newsSource.doe}}</p>
+    <p>Type: {{newsSource.type}}</p>
+    <p>Publisher: {{newsSource.publisher}}</p>
+    <p>Location: {{newsSource.location}}</p>
+    <p>Editor: {{newsSource.editor}}</p>
+    <p>Information about the news source:</p>
+    <p>Writes about:</p>
+    <table id="stories">
+            <tr>
+                <th>Title</th>
+                <th>Associated query</th>
+                <th>Date</th>
+            </tr>
+            <!-- Fills out the table --> 
+            {% for story in stories %}
+                <tr data-id={{story.sid}}>
+                    <td class="title"><a href="{{story.url}}">{{story.title}}</td>
+                    <td class="query">{{story.originQuery}}</td>
+                    <td class="date">{{story.resultDate}}</td>
+                </tr>
+            {% endfor %}
+           
+        </table>
+    <!--<p>{% for story in stories%}</p>-->
+    <!--<p>{{ story.title }}</p>-->
+    <!--<p>{% endfor %}</p>-->
+    <p>Is similar to:</p>
+    <article id="similar">
+        <ul>
+            {% for source in search_results %}
+            <li><a href="{{source.url}}">{{ source.name }}</a></li>
+            {% endfor %}
+        </ul>
+    </article>
+</div>
+
+{% endblock %}
+
+{% extends "base.html" %}
+{% block main %}
+<br>
+
+<article id="search-results">
+    <ul>
+        {% for source in search_results %}
+        <li><a href="{{source.url}}">{{ source.name }}</a></li>
+        {% endfor %}
+    </ul>
+</article>
+
+{% endblock %}{% extends "base.html" %}
+
+{% block main %}
+    <div>
+        <p>Here are the news sources on your watchlist</p>
+        
+        <table id="watchlist">
+            
+            <tr>
+                <th>Name</th>
+                <th>Watching since</th>
+            </tr>
+            
+            <!-- Fills out movie table --> 
+            {% for item in sources %}
+                <tr data-id={{item.nsid}}>
+                <td class="name">{{item.name}}</td>
+                <td class="date">{{item.addDate}}</td>
+                <td><button class="unwatch">Stop watching</button></td>
+            </tr>
+            {% endfor %}
+           
+        </table>
+        
+    </div>
+    
+    
+{% endblock %}

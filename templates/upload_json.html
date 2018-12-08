@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+
+<p>Form to upload a file:
+<form method="post" action="" enctype="multipart/form-data">
+    <p><label for="nm">NM: <input type="text" name="nm"></label></p>
+    <p><label for="pic">Pic: <input type="file" name="pic"></label></p>
+    <p><input type="submit" value="upload"></p>
+</form>
+
+{% if nm != '' and src != '' %}
+<p>Last upload: {{nm}}</p>
+<p> <img src="{{src}}"></p>
+{% endif %}
+
+{% endblock %}
