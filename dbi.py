@@ -24,7 +24,7 @@ def connect(db):
     # cnf['db'] = db
     # conn = MySQLdb.connect(**cnf)
     #I NEED TO FIGURE OUT HOW TO DO **CNF THING
-    conn = MySQLdb.connect(user='kumarova', host='localhost',
+    conn = MySQLdb.connect(user='ubuntu', host='localhost',
                           passwd='',
                           db=db)
     conn.autocommit(True)
@@ -59,6 +59,13 @@ def getNewsSourceByURL(conn, url):
     urlLike = str("%" + url + "%")
     curs.execute('''select nsid from newsSource where url like %s''', [urlLike])
     return curs.fetchone()
+
+def findArticlesByTopic(conn, title):   
+    """Extracts stories/search results that come from the given news source"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    titleLike = str("%" + title + "%")
+    curs.execute('''select newsSource.nsid, newsSource.name, searchresults.url, searchresults.title from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
+    return curs.fetchall()
     
     
 def getSearchedNewsSources(conn, searchTerm):

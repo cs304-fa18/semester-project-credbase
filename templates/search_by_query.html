@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+<form id="title-search" method=POST action= {{url_for('searchArticles')}}>
+                <input id="query-term" placeholder="Search" name="query-term">
+                <button id="search-query" type="submit" name="submit" value="Search">Search</button>
+                </form>
+<article id="query-results">
+    <ul>
+        {% for article in articles %}
+        <li>
+            <!-- Having some kind of a group by for the source in the sql code would be nice, not sure how to implement in jinja -->
+            <a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a> published: 
+            <a href="{{article.url}}">{{article.title}}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</article>
+
+{% endblock %}

@@ -29,7 +29,10 @@ app = Flask(__name__)
 app.secret_key = "a very secret phrase"
 app.config['UPLOADS'] = 'uploads'
 
-dbi.addMBF(mediaBias_intoNS.getTups())
+#print mediaBias_intoNS.getTups()
+
+#workaround to load data into databse
+#dbi.addMBF(dbi.connect('credbase'), mediaBias_intoNS.getTups())
  
 """Home page"""
 @app.route('/')
@@ -101,12 +104,17 @@ def file_upload():
 @app.route('/source/search/', defaults={'search_term':''})
 @app.route('/source/search/<search_term>')
 def newsSourceSearchResults(search_term):
+    """This page displays search results when there are multiple results that
+    satisfy the search query. If there is only one, it redirects to the page
+    of this news source. If there are none, it flashes the message"""
     conn = dbi.connect('credbase')
     search_results = dbi.getSearchedNewsSources(conn, search_term)
+    if len(search_results) == 1:
+        return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
+    elif len(search_results) == 0:
+        flash('Sorry, no news source with such name was found')
     return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
 
-    
-    
     
 """News source information"""    
 @app.route('/source/<int:nsid>')
@@ -128,22 +136,16 @@ def search():
     search_term = request.form.get("searchterm")
     return redirect(url_for('newsSourceSearchResults', search_term=search_term))
     
-
-@app.route('/source/search/', defaults={'search_term':''})
-@app.route('/source/search/<search_term>')
-def newsSourceSearchResults(search_term):
-    """This page displays search results when there are multiple results that
-    satisfy the search query. If there is only one, it redirects to the page
-    of this news source. If there are none, it flashes the message"""
-    conn = dbi.connect('credbase')
-    search_results = dbi.getSearchedNewsSources(conn, search_term)
-    if len(search_results) == 1:
-        return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
-    elif len(search_results) == 0:
-        flash('Sorry, no news source with such name was found')
-    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
-  
-
+@app.route('/search-articles/', methods=['GET', 'POST'])
+def searchArticles():
+    '''Redirects to the page with article titles whose title is like the query'''
+    if request.method == "POST":
+        conn = dbi.connect('credbase') 
+        title = request.form.get("query-term")
+        articles = dbi.findArticlesByTopic(conn, title)
+        return render_template('search_by_query.html', articles=articles)
+    else:
+        return render_template('search_by_query.html', articles=[])
 
 ##-------------------# Pages for session/login management #-------------------##
 @app.route('/login/', methods = ['POST'])

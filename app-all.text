@@ -88,7 +88,12 @@ def search():
     '''Redirects to the page with news source search results'''
     search_term = request.form.get("searchterm")
     return redirect(url_for('newsSourceSearchResults', search_term=search_term))
-    
+
+@app.route('/subject/', methods=['GET', 'POST'])
+def searchBySubject():
+    '''Redirects to the page with artciles whose titles matching search query'''
+    search_term = request.form.get("query-term")
+    return redirect(url_for('newsSourceSearchResults', search_term=search_term))
 
 #NEED TO DEFINE LOGINS & SIGNUPS
 @app.route('/join/')
