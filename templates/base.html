@@ -24,7 +24,9 @@
                 <h4 class='login_session'>{{ login_session }}</h4>
             </th>
             <th>
-                <button id="logout">logout</button>
+                <form id="logout" action= {{url_for('logout')}} method="post">
+                <button id="logout" type="submit" name="submit" value="logout">logout</button>
+                </form>
             </th>
         </tr>
     </table>

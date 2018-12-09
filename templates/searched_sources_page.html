@@ -5,7 +5,7 @@
 <article id="search-results">
     <ul>
         {% for source in search_results %}
-        <li><a href="{{source.url}}">{{ source.name }}</a></li>
+        <li><a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a></li>
         {% endfor %}
     </ul>
 </article>
