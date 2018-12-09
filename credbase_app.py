@@ -12,14 +12,24 @@ November, 2018
 
 from flask import (Flask, url_for, redirect, request, render_template, session, 
                    flash, jsonify)
+#files -- annabel
+from werkzeug import secure_filename
+import os
+import imghdr
+import json
+import mediaBias_intoNS
 #import python files that do the lookup
 import dbi
 import bcrypt
+
+
  
 
 app = Flask(__name__)
 app.secret_key = "a very secret phrase"
- 
+app.config['UPLOADS'] = 'uploads'
+
+dbi.addMBF(mediaBias_intoNS.getTups())
  
 """Home page"""
 @app.route('/')
@@ -57,6 +67,47 @@ def user(username):
         flash('some kind of error '+str(err))
         return redirect( url_for('index') )
 
+@app.route('/upload/', methods=["GET", "POST"])
+def file_upload():
+    if request.method == 'GET':
+        return render_template('upload_json.html',src='',nm='')
+    else:
+        try:
+            nm = int(request.form['nm']) # may throw error
+            query = request.form['query']
+            date = request.form['date']
+            #make uploader give a valid date and query for use in database
+            if query == '' or date == '':
+                if query == '':
+                    flash('You must provide the query title')
+                if date == '':
+                    flash('You must provide a date in format month-day-year, ex: 01-01-2018')
+                return render_template('upload_json.html',src='',nm='')
+            f = request.files['file']
+            validJSON = False 
+            # weak check to see if file is true json file
+            if f.content_type == "application/json":
+                validJSON = True
+            else:
+                flash("Upload Error: file must be of type JSON")
+            if validJSON:
+                filename = secure_filename('{}.{}'.format(nm,"json"))
+                print "filename: " + filename
+                pathname = os.path.join(app.config['UPLOADS'],filename)
+                print "pathname: " + pathname
+                f.save(pathname)
+                print "saved file"
+                flash('Upload successful')
+                conn = dbi.connect('credbase')
+                curs = conn.cursor()
+                dbi.addFile(conn, nm, filename, query, date)
+                return render_template('upload_json.html',
+                                       src=url_for('file_upload',nm=nm),
+                                       nm=nm)
+            return render_template('upload_json.html',src='',nm='')
+        except Exception as err:
+            flash('Upload failed {why}'.format(why=err))
+            return render_template('upload_json.html',src='',nm='')
         
         
 @app.route('/source/search/', defaults={'search_term':''})
