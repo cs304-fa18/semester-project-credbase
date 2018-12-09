@@ -10,6 +10,7 @@ import sys
 import MySQLdb
 import pandas as pd
 import json
+import os
 #import dbconn2
 
 #annabel testing:
@@ -151,7 +152,8 @@ def addFile(conn, nm, filename, query, date):
         # in future want to add new news source to newsSource
         addStory(conn, query, date, url, title, nsid)
 
-
+    #remove file once we've read search results from it
+    os.remove("uploads" + filename)
 
 if __name__ == '__main__':
     conn = connect('credbase')
