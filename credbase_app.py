@@ -143,6 +143,11 @@ def searchArticles():
         conn = dbi.connect('credbase') 
         title = request.form.get("query-term")
         articles = dbi.findArticlesByTopic(conn, title)
+        for entry in articles:
+            print entry
+            entry['url'] = entry['url'].decode('utf-8')
+            entry['title'] = entry['title'].decode('utf-8')
+            entry['name'] = entry['name'].decode('utf-8')
         return render_template('search_by_query.html', articles=articles)
     else:
         return render_template('search_by_query.html', articles=[])

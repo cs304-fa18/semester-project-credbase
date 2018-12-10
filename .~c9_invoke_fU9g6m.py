@@ -153,6 +153,7 @@ def addFile(conn, nm, filename, query, date):
         addStory(conn, query, date, url, title, nsid)
 
     #remove file once we've read search results from it
+    os.remove("uploads" + filename)
 
 if __name__ == '__main__':
     conn = connect('credbase')

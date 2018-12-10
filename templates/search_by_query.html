@@ -9,7 +9,6 @@
     <ul>
         {% for article in articles %}
         <li>
-            <!-- Having some kind of a group by for the source in the sql code would be nice, not sure how to implement in jinja -->
             <a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a> published: 
             <a href="{{article.url}}">{{article.title}}</a>
         </li>
