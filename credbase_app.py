@@ -127,6 +127,11 @@ def newsSource(nsid):
         return redirect( url_for('home') )
     else:
         stories = dbi.getStoriesByNewsSource(conn, nsid)
+        for story in stories:
+            print story
+            story['url'] = story['url'].decode('utf-8')
+            story['title'] = story['title'].decode('utf-8')
+            story['originQuery'] = story['originQuery'].decode('utf-8')
         return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
 
         
