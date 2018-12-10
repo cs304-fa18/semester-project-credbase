@@ -3,9 +3,9 @@
 <br>
 
 <article id="search-results">
-    <ul>
+    <ul style="font-size:20px;">
         {% for source in search_results %}
-        <li><a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a></li>
+        <li><a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a></li>
         {% endfor %}
     </ul>
 </article>

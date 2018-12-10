@@ -4,19 +4,20 @@
     <div>
         <p>Here are the news sources on your watchlist</p>
         
-        <table id="watchlist">
-            
+        <table class="table" id="watchlist">
+            <thead>
             <tr>
-                <th>Name</th>
-                <th>Watching since</th>
+                <th scope="col">Name</th>
+                <th scope="col">Watching since</th>
+                <th scope="col"> </th>
             </tr>
-            
+            </thead>
             <!-- Fills out movie table --> 
             {% for item in sources %}
-                <tr data-id={{item.nsid}}>
-                <td class="name">{{item.name}}</td>
-                <td class="date">{{item.addDate}}</td>
-                <td><button class="unwatch">Stop watching</button></td>
+                <tr scope="row" data-id={{item.nsid}}>
+                <td scope="row" class="name">{{item.name}}</td>
+                <td scope="row" class="date">{{item.addDate}}</td>
+                <td scope="row"><button class="unwatch">Stop watching</button></td>
             </tr>
             {% endfor %}
            

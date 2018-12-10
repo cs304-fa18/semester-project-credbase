@@ -2,24 +2,53 @@
 {% block main %}
 <br>
 
-<div>
-    <p>Here we will have more info about the news source...</p>
-    <p>Date established: {{newsSource.doe}}</p>
-    <p>Type: {{newsSource.type}}</p>
-    <p>Publisher: {{newsSource.publisher}}</p>
-    <p>Location: {{newsSource.location}}</p>
-    <p>Editor: {{newsSource.editor}}</p>
-    <p>Information about the news source:</p>
-    <p>Writes about:</p>
-    <table id="stories">
+<div class="container-fluid">
+    <h3>About the news source:</h3>
+    <div class="col-md-6">
+    <ul class="list-group">
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Date established:
+        <span class="badge badge-primary badge-pill">{{newsSource.doe}}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Type:
+        <span class="badge badge-primary badge-pill">{{newsSource.type}}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Publisher:
+        <span class="badge badge-primary badge-pill">{{newsSource.publisher}}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Location:
+        <span class="badge badge-primary badge-pill">{{newsSource.location}}</span>
+      </li>
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        Editor:
+        <span class="badge badge-primary badge-pill">{{newsSource.editor}}</span>
+      </li>
+    </ul>
+    </div>
+    
+    <br>
+    
+    <!--<p>Date established: {{newsSource.doe}}</p>-->
+    <!--<p>Type: {{newsSource.type}}</p>-->
+    <!--<p>Publisher: {{newsSource.publisher}}</p>-->
+    <!--<p>Location: {{newsSource.location}}</p>-->
+    <!--<p>Editor: {{newsSource.editor}}</p>-->
+    <!--<h3>Information about the news source:</h3>-->
+    <h3>The news source writes about:</h3>
+    <table class="table" id="stories">
+        <thead>
             <tr>
-                <th>Title</th>
-                <th>Associated query</th>
-                <th>Date</th>
+                <th scope="col">Title</th>
+                <th scope="col">Associated query</th>
+                <th scope="col">Date</th>
             </tr>
+        </thead>
             <!-- Fills out the table --> 
             {% for story in stories %}
-                <tr data-id={{story.sid}}>
+                <tr scope="row" data-id={{story.sid}}>
                     <td class="title"><a href="{{story.url}}">{{story.title}}</td>
                     <td class="query">{{story.originQuery}}</td>
                     <td class="date">{{story.resultDate}}</td>
@@ -30,7 +59,7 @@
     <!--<p>{% for story in stories%}</p>-->
     <!--<p>{{ story.title }}</p>-->
     <!--<p>{% endfor %}</p>-->
-    <p>Is similar to:</p>
+    <h3>The news source is similar to:</h3>
     <article id="similar">
         <ul>
             {% for source in search_results %}

@@ -2,36 +2,38 @@
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" href="/static/styles.css">
-        <meta name=author content="Khonzoda Umarova & Annabel Rothschilda">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <meta name=author content="Khonzoda Umarova & Annabel Rothschild">
         <title></title>
     </head>
     <body>
-     
+ 
+ 
     {% block header %}   
-    <table id="header" width="100%">
-        <tr>
-            <th>
-                <form id="search" method=POST action= {{url_for('search')}}>
-                <input id="searchterm" placeholder="Search" name="searchterm">
-                <button id="searchbutton" type="submit" name="submit" value="Search">Search</button>
-                </form>
-            </th>
-            <th>
-                <h3 class="logo">CRED base</h3>
-            </th>
-            <th>
-                <h4 class='login_session'>{{ login_session }}</h4>
-            </th>
-            <th>
-                <form id="logout" action= {{url_for('logout')}} method="post">
-                <button id="logout" type="submit" name="submit" value="logout">logout</button>
-                </form>
-            </th>
-        </tr>
-    </table>
+    <nav class="navbar navbar-fixed-top navbar-bootsnipp bg-light">
+            <form class="form-inline" id="search" method=POST action= {{url_for('search')}}>
+                <input class="form-control" type="search" placeholder="Search" aria-label="Search" name="searchterm">
+                <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+            </form>
+            
+            <div>
+                <a class="navbar-brand text-dark" href="{{url_for('home')}}">CredBase</a>
+            </div>
+    
+            <form class="form-inline" id="logout" action= {{url_for('logout')}} method="post">
+            <div>
+                <h4 class='col-sm col-form-label'> {{ login_session }} </h4>
+            </div>
+            <button class="btn btn-primary" id="logout" type="submit" name="submit" value="logout">logout</button>
+            </form>
+    </nav>
+    
+        
+
     {% endblock  %}
     
+    <div class='container-fluid'>
     {% block title %}
     <h1 class="title">{{ page_title }}</h1>
     {% endblock  %}
@@ -53,6 +55,6 @@
     {% block main %} 
     {% endblock  %}
     
-
+    </div>
     </body>
     </html>
