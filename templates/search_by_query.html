@@ -53,9 +53,9 @@
 $("#article-results").on("click", ".update-article", function(event){
     var articleRow = $(this).closest("tr");
     var sid_id = articleRow.find(".sid").text();
-    var fake = "{{url_for('update-article', sid=10)}}";
+    var fake = "{{url_for('updateArticle', sid=10)}}";
     var real = fake.replace(/10/, sid_id);
-    $.post(real);
+    $.get(real);
 });
     /*global $*/
 </script>

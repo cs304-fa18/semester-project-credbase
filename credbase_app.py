@@ -160,12 +160,23 @@ def searchArticles():
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
     '''Redirects to the page with pre-filled information to update for article'''
-    conn = dbi.connect('credbase') 
-    print "got past conn"
-    #print request.json
-    #sid = request.json['sid']
-    articleInfo = dbi.getArticleBySid(conn, sid)
-    return render_template('update_article.html', articleInfo=articleInfo)
+    #need to do something so if all the original values are still in there, bc posting 
+    if request.method == "GET":
+        print "method is get"
+        conn = dbi.connect('credbase') 
+        print "got past conn"
+        #print request.json
+        #sid = request.json['sid']
+        articleInfo = dbi.getArticleBySid(conn, sid)
+        return render_template('update_article.html', articleInfo=articleInfo)
+    if request.method == "POST":
+        if 'submit' in request.form:
+            if 'delete' in request.form['submit']: 
+                dbi.deleteSearchResult(sid)
+        conn = dbi.connect('credbase') 
+        #get new information from entries on template then send to mysql
+        articleInfo = dbi.getArticleBySid(conn, sid)
+        return render_template('update_article.html', articleInfo=articleInfo)
     
 @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
 def deleteArticle(sid):
