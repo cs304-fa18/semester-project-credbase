@@ -2,12 +2,56 @@
 {% block main %}
 <br>
 
+
+<article id="search-results">
+    <table class="table" id="search-results">
+        <thead>
+            <tr>
+                <th scope="col">Source</th>
+                <th scope="col">URL</th>
+                <th scope="col">Date of Establishment</th>
+                <th scope="col">Update this Result</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for source in search_results %}
+            <tr scope="row" data-sid={{source.nsid}}>
+                <td scope="row" class="nsid" style="display:none">{{source.nsid}}</td>
+                <td scope="row"><a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a></td>
+                <td scope="row"><a href="{{source.url}}">{{source.url}}</a></td>
+                <td scope="row">{{source.doe}}</td>
+                <form method="post" action="{{url_for('updateSource', nsid=source.nsid)}}">
+                <td scope="row"><button class="update-source">Update</button></td>
+                <form></form>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+<!--
 <article id="search-results">
     <ul style="font-size:20px;">
         {% for source in search_results %}
-        <li><a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a></li>
+        <li> 
+            <span> </span>
+            <a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a>
+            <button class="update-source">Update Source</button>
+        </li>
         {% endfor %}
     </ul>
 </article>
+-->
+
+
+<script>
+    /*global $*/
+    $("#search-results").on("click", ".update-source", function(event){
+    var articleRow = $(this).closest("tr");
+    var nsid_id = articleRow.find(".nsid").text();
+    var fake = "{{url_for('updateSource', nsid=10)}}";
+    var real = fake.replace(/10/, nsid_id);
+    $.get(real);
+});
+</script>
+
 
 {% endblock %}

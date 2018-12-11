@@ -126,13 +126,16 @@ def newsSource(nsid):
         return redirect( url_for('home') )
     else:
         stories = dbi.getStoriesByNewsSource(conn, nsid)
-        for story in stories:
-            story['url'] = unicode(story['url'], errors='ignore')
-            story['title'] = unicode(story['url'], errors='ignore')
-            story['originQuery'] = unicode(story['originQuery'], errors='ignore')
-            story['resultDate'] = unicode(story['resultDate'], errors='ignore')
-        return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
-
+        try:
+            for story in stories:
+                story['url'] = unicode(story['url'], errors='ignore')
+                story['title'] = unicode(story['url'], errors='ignore')
+                story['originQuery'] = unicode(story['originQuery'], errors='ignore')
+                story['resultDate'] = unicode(story['resultDate'], errors='ignore')
+            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
+        #weird error, don't know why it's happening except if already decoded?
+        except TypeError: 
+            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
         
 @app.route('/search/', methods=['GET', 'POST'])
 def search():
@@ -146,14 +149,19 @@ def searchArticles():
     if request.method == "POST":
         conn = dbi.connect('credbase') 
         title = request.form.get("query-term")
+        print "search term: " + title
         articles = dbi.findArticlesByTopic(conn, title)
-        for entry in articles:
-            print entry
-            entry['url'] = unicode(entry['url'], errors='ignore')
-            entry['title'] = unicode(entry['title'], errors='ignore')
-            entry['name'] = unicode(entry['name'], errors='ignore')
-            print entry['name']
-        return render_template('search_by_query.html', articles=articles)
+        try:
+            for entry in articles:
+                print entry
+                entry['url'] = unicode(entry['url'], errors='ignore')
+                entry['title'] = unicode(entry['title'], errors='ignore')
+                entry['name'] = unicode(entry['name'], errors='ignore')
+                print entry['name']
+            return render_template('search_by_query.html', articles=articles)
+        #don't know why error happens but it does and we handle it here
+        except TypeError: 
+            return render_template('search_by_query.html', articles=articles)
     else:
         return render_template('search_by_query.html', articles=[])
         
@@ -161,31 +169,31 @@ def searchArticles():
 def updateArticle(sid):
     #NOT THREAD SAFE -- NEED TO FIX
     
-    #ANNABEL NEEDS TO ADD A SUBMIT BUTTON wow kid
-    
+
     '''Redirects to the page with pre-filled information to update for article'''
     #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
     if request.method == "GET":
         articleInfo = dbi.getArticleBySid(conn, sid)
-        articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
-        articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
-        return render_template('update_article.html', articleInfo=articleInfo)
+        try:
+            articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
+            articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
+            return render_template('update_article.html', articleInfo=articleInfo)
+        #again weird unicode error
+        except TypeError:
+            return render_template('update_article.html', articleInfo=articleInfo)
     if request.method == "POST":
         if 'submitDelete' in request.form:
             if 'delete' in request.form['submitDelete']: 
                 print "going to delete"
                 #ANNABEL: UNCOMMENT BELOW WHEN DONE DEBUGGING
-                #dbi.deleteSearchResult(conn, sid)
+                dbi.deleteSearchResult(conn, sid)
             # get new information from entries on template then send to mysql
                 flash("Article with SID: " + str(sid) + " was removed from the database")
                 articleInfo = dbi.getArticleBySid(conn, sid)
                 return render_template('update_article.html', articleInfo=[])
         if 'submitUpdate' in request.form:
-            #SUBMIT BUTTON IS NOT WORKING
-            print "submitting update request"
             if 'update' in request.form['submitUpdate']: 
-                #BUG: it's deleting the current values and 
                 original = dbi.getArticleBySid(conn, sid)
                 if (original['url'] != request.form['url']) and (request.form['url'] != ""):
                     dbi.updateArticleURL(conn, request.form['url'], sid)
@@ -196,12 +204,70 @@ def updateArticle(sid):
                     dbi.updateArticleOriginQuery(conn, request.form['oq'], sid)
                 if (original['title'] != request.form['title']) and (request.form['title'] != ""):
                      dbi.updateArticleTitle(conn, request.form['title'], sid)
-                #get new information from entries on template then send to mysql
                 articleInfo = dbi.getArticleBySid(conn, sid)
                 return render_template('update_article.html', articleInfo=articleInfo)
-        articleInfo = dbi.getArticleBySid(conn, sid)
-        flash("No changes made, please change appropriate values or delete item, as desired")
-        return render_template('update_article.html', articleInfo=articleInfo)
+    articleInfo = dbi.getArticleBySid(conn, sid)
+    #can't actually flash bc confusing with post methods
+    #flash("No changes made, please change appropriate values or delete item, as desired")
+    return render_template('update_article.html', articleInfo=articleInfo)
+
+@app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
+def updateSource(nsid):
+    #NOT THREAD SAFE -- NEED TO FIX
+    
+
+    '''Redirects to the page with pre-filled information to update for source'''
+    #need to do something so if all the original values are still in there, bc posting 
+    conn = dbi.connect('credbase') 
+    if request.method == "GET":
+        sourceInfo = dbi.lookupNewsSource(conn, nsid)
+        try:
+            sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+            sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+            return render_template('update_source.html', sourceInfo=sourceInfo)
+        #again weird unicode error
+        except TypeError:
+            return render_template('update_source.html', sourceInfo=sourceInfo)
+    if request.method == "POST":
+        if 'submitDelete' in request.form:
+            if 'delete' in request.form['submitDelete']: 
+                print "going to delete"
+                #ANNABEL: UNCOMMENT BELOW WHEN DONE DEBUGGING
+                dbi.deleteSource(conn, nsid)
+            # get new information from entries on template then send to mysql
+                flash("Source with NSID: " + str(nsid) + " was removed from the database")
+                sourceInfo = dbi.lookupNewsSource(conn, nsid)
+                return render_template('update_source.html', sourceInfo=[])
+        if 'submitUpdate' in request.form:
+            if 'update' in request.form['submitUpdate']: 
+                original = dbi.lookupNewsSource(conn, nsid)
+                if (original['name'] != request.form['name']) and (request.form['name'] != ""):
+                     dbi.updateSourceName(conn, request.form['name'], nsid)
+                if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
+                     dbi.updateSourcePublisher(conn, request.form['publisher'], nsid)
+                #special case where may not have a media type value picked
+                if 'mediatype' in request.form['submitUpdate']:
+                    if (original['mediatype'] != request.form['mediatype']) and (request.form['mediatype'] != ""):
+                         print original['mediatype']
+                         print request.form['mediatype']
+                         dbi.updateSourceMediatype(conn, request.form['mediatype'], nsid)
+                if (original['location'] != request.form['location']) and (request.form['location'] != ""):
+                     dbi.updateSourceLocation(conn, request.form['location'], nsid)
+                if (original['editor'] != request.form['editor']) and (request.form['editor'] != ""):
+                     dbi.updateSourceEditor(conn, request.form['editor'], nsid)
+                if (original['url'] != request.form['url']) and (request.form['url'] != ""):
+                    dbi.updateSourceURL(conn, request.form['url'], nsid)
+                if (original['doe'] != request.form['doe']) and (request.form['doe'] != ""):
+                     dbi.updateSourceDOE(conn, request.form['doe'], nsid)
+                sourceInfo = dbi.lookupNewsSource(conn, nsid)
+                return render_template('update_source.html', sourceInfo=sourceInfo)
+    sourceInfo = dbi.lookupNewsSource(conn, nsid)
+    #can't actually flash bc confusing with post methods
+    #flash("No changes made, please change appropriate values or delete item, as desired")
+    return render_template('update_source.html', sourceInfo=sourceInfo)
+
+
+        
 @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
 def deleteArticle(sid):
     '''Redirects to the page with pre-filled information to update for article'''

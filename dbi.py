@@ -64,9 +64,13 @@ def getNewsSourceByURL(conn, url):
 def findArticlesByTopic(conn, title):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    titleLike = str("%" + title + "%")
+    titleLike = '%' + title + '%'
+    print titleLike
     curs.execute('''select newsSource.nsid, newsSource.name, searchresults.sid, searchresults.url, searchresults.title, searchresults.resultDate, searchresults.originQuery from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
-    return curs.fetchall()
+    #annabel clean this up later, debugging
+    returnVal = curs.fetchall()
+    print returnVal
+    return returnVal
     
     
 def getSearchedNewsSources(conn, searchTerm):
@@ -90,6 +94,12 @@ def deleteSearchResult(conn, sid):
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
+    
+#delete source from database
+def deleteSource(conn, nsid):
+    conn = connect("credbase")
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute ('''delete from newsSource where nsid=%s''', [nsid])
     
 #article update methods, separated for clarity, not necessarily efficient
 def updateArticleTitle(conn, title, sid):
@@ -119,7 +129,59 @@ def updateArticleOriginQuery(conn, oq, sid):
         curs.execute('''update searchresults set originQuery = %s where sid = %s''', [oq, sid])
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
+
+#update source methods, many for clarity:
+#there's a way to do this with sql replace field but I can't make it work
+def updateSourceName(conn, name, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set name = %s where nsid = %s''', [name, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
         
+def updateSourcePublisher(conn, publisher, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set publisher = %s where nsid = %s''', [publisher, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+        
+def updateSourceMediatype(conn, mediatype, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set mediatype = %s where nsid = %s''', [mediatype, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+        
+def updateSourceLocation(conn, location, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set location = %s where nsid = %s''', [location, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+ 
+def updateSourceEditor(conn, editor, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set editor = %s where nsid = %s''', [editor, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)     
+        
+def updateSourceURL(conn, url, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set url = %s where nsid = %s''', [url, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)     
+        
+
+def updateSourceDOE(conn, doe, nsid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update newsSource set doe = %s where nsid = %s''', [doe, nsid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)     
+
 def lookupUser(conn, uid):
     """Extracts the user associated with the given ID and information about them,
     including passoword hash??"""

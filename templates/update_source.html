@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+
+<p>Update Source 
+<form method="post" action="" enctype="multipart/form-data">
+    <p><label for="name">Name: <input type="text" name="name">{{sourceInfo.name}}</label></p>
+    <p><label for="publisher">Publisher: <input type="text" name="publisher">{{sourceInfo.publisher}}</label></p>
+    <p><label for="location">Location: <input type="text" name="location">{{sourceInfo.location}}</label></p>
+    <p><label for="editor">Editor: <input type="text" name="editor">{{sourceInfo.editor}}</label></p>
+    <p><label for="doe">Date of Establishment (YYYY form, ex: 1983): <input type="text" name="doe">{{sourceInfo.doe}}</label></p>
+    <br> Media Type: 
+    <p><input type="radio" name="mediatype" value="newspaper"> Newspaper </p>
+    <p><input type="radio" name="mediatype" value="magazine"> Magazine </p>
+    <p><input type="radio" name="mediatype" value="radio/tv"> Radio/TV </p>
+    <p><input type="radio" name="mediatype" value="blog"> Blog </p>
+    <p><input type="radio" name="mediatype" value="website"> Website or Web-based </p>
+    <p><label for="url">URL: <input type="text" name="url">{{sourceInfo.url}}</label></p>
+    <p><label for="delete">Delete Article<input id="deletebutton" type="submit" name="submitDelete" value="delete" data-sid="{{sourceInfo.nsid}}"></label></p>
+    <p><label for="update">Update Article<input id="updatebutton" type="submit" name="submitUpdate" value="update" data-sid="{{sourceInfo.nsid}}"></label></p>
+
+</form>
+
+<script>
+    /*global $*/
+    
+</script>
+
+{% endblock %}
