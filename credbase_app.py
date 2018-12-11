@@ -156,6 +156,22 @@ def searchArticles():
         return render_template('search_by_query.html', articles=articles)
     else:
         return render_template('search_by_query.html', articles=[])
+        
+@app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
+def updateArticle(sid):
+    '''Redirects to the page with pre-filled information to update for article'''
+    conn = dbi.connect('credbase') 
+    print "got past conn"
+    #print request.json
+    #sid = request.json['sid']
+    articleInfo = dbi.getArticleBySid(conn, sid)
+    return render_template('update_article.html', articleInfo=articleInfo)
+    
+@app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
+def deleteArticle(sid):
+    '''Redirects to the page with pre-filled information to update for article'''
+    conn = dbi.connect('credbase') 
+    return render_template('delete_article.html')
 
 ##-------------------# Pages for session/login management #-------------------##
 @app.route('/login/', methods = ['POST'])

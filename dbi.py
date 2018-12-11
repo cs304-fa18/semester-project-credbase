@@ -65,7 +65,7 @@ def findArticlesByTopic(conn, title):
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     titleLike = str("%" + title + "%")
-    curs.execute('''select newsSource.nsid, newsSource.name, searchresults.url, searchresults.title, searchresults.resultDate, searchresults.originQuery from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
+    curs.execute('''select newsSource.nsid, newsSource.name, searchresults.sid, searchresults.url, searchresults.title, searchresults.resultDate, searchresults.originQuery from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
     return curs.fetchall()
     
     
@@ -76,6 +76,17 @@ def getSearchedNewsSources(conn, searchTerm):
     curs.execute('''select * from newsSource where name like %s''', [pattern])
     return curs.fetchall()
 
+def getArticleBySid(conn, sid):
+    """Searches the database for article with matching nsid"""
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from searchresults where sid = %s''', [sid])
+    return curs.fetchone()
+
+#delete article from database
+def deleteSearchResult(sid):
+    conn = connect("credbase")
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute ('''delete from searchresults where sid=%s''', [sid])
 
 def lookupUser(conn, uid):
     """Extracts the user associated with the given ID and information about them,

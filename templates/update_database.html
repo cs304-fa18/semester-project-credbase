@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+
+
+    <form class="form-inline" id="search" method=POST action= {{url_for('search')}}>
+        <input class="form-control" type="search" placeholder="Search a Source" aria-label="Search a Source" name="searchterm">
+        <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
+    </form>
+
+<p>Find a source to update: 
+<form method="post" action="" enctype="multipart/form-data">
+    <p><label for="nm">Your CRED ID#: <input type="text" name="nm"></label></p>
+    <p><label for="pic">File: <input type="file" name="file"></label></p>
+    <p><label for="date">Enter date in form YYYY-MM-DD: <input type="text" name="date"></label></p>
+    <p><label for="query">Origin query: <input type="text" name="query"></label></p>
+    <p><input type="submit" value="upload"></p>
+</form>
+
+{% if nm != '' and src != '' %}
+<p>Last upload: {{nm}}</p>
+{% endif %}
+
+{% endblock %}

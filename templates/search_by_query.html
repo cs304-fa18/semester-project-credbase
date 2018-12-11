@@ -9,22 +9,27 @@
 -->
 
 <article id="query-results">
-    <table class="table">
+    <table class="table" id="article-results">
         <thead>
             <tr>
                 <th scope="col">Article Title</th>
                 <th scope="col">Source</th>
                 <th scope="col">Origin Query</th>
                 <th scope="col">Result Date</th>
+                <th scope="col">Update this Result</th>
             </tr>
         </thead>
         <tbody>
             {% for article in articles %}
-            <tr scope="row">
+            <tr scope="row" data-sid={{article.sid}}>
+                <td scope="row" class="sid" style="display:none">{{article.sid}}</td>
                 <td scope="row"><a href="{{article.url}}">{{article.title}}</a></td>
                 <td scope="row"><a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a></td>
                 <td scope="row">{{article.originQuery}}</td>
                 <td scope="row">{{article.resultDate}}</td>
+                <form method="post" action="{{url_for('updateArticle', sid=article.sid)}}">
+                <td scope="row"><button class="update-article">Update</button></td>
+                <form></form>
             </tr>
             {% endfor %}
         </tbody>
@@ -42,5 +47,18 @@
     </ul>
     -->
 </article>
+
+<script>
+
+$("#article-results").on("click", ".update-article", function(event){
+    var articleRow = $(this).closest("tr");
+    var sid_id = articleRow.find(".sid").text();
+    var fake = "{{url_for('update-article', sid=10)}}";
+    var real = fake.replace(/10/, sid_id);
+    $.post(real);
+});
+    /*global $*/
+</script>
+
 
 {% endblock %}
