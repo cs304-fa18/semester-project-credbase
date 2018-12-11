@@ -80,14 +80,46 @@ def getArticleBySid(conn, sid):
     """Searches the database for article with matching nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from searchresults where sid = %s''', [sid])
-    return curs.fetchone()
+    #annabel was debugging using returnVal, delete later
+    returnVal =  curs.fetchone()
+    print returnVal
+    return returnVal
 
 #delete article from database
-def deleteSearchResult(sid):
+def deleteSearchResult(conn, sid):
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
+    
+#article update methods, separated for clarity, not necessarily efficient
+def updateArticleTitle(conn, title, sid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update searchresults set title = %s where sid = %s''', [title, sid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+        
+def updateArticleURL(conn, url, sid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update searchresults set url = %s where sid = %s''', [url, sid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+        
+def updateArticleResultDate(conn, date, sid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update searchresults set resultDate = %s where sid = %s''', [date, sid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
 
+def updateArticleOriginQuery(conn, oq, sid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    try:
+        curs.execute('''update searchresults set originQuery = %s where sid = %s''', [oq, sid])
+    except (MySQLdb.Error, MySQLdb.Warning) as error:
+        print(error)
+        
 def lookupUser(conn, uid):
     """Extracts the user associated with the given ID and information about them,
     including passoword hash??"""

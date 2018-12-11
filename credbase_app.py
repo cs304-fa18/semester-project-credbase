@@ -159,25 +159,49 @@ def searchArticles():
         
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
+    #NOT THREAD SAFE -- NEED TO FIX
+    
+    #ANNABEL NEEDS TO ADD A SUBMIT BUTTON wow kid
+    
     '''Redirects to the page with pre-filled information to update for article'''
     #need to do something so if all the original values are still in there, bc posting 
+    conn = dbi.connect('credbase') 
     if request.method == "GET":
-        print "method is get"
-        conn = dbi.connect('credbase') 
-        print "got past conn"
-        #print request.json
-        #sid = request.json['sid']
         articleInfo = dbi.getArticleBySid(conn, sid)
+        articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
+        articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
         return render_template('update_article.html', articleInfo=articleInfo)
     if request.method == "POST":
-        if 'submit' in request.form:
-            if 'delete' in request.form['submit']: 
-                dbi.deleteSearchResult(sid)
-        conn = dbi.connect('credbase') 
-        #get new information from entries on template then send to mysql
+        if 'submitDelete' in request.form:
+            if 'delete' in request.form['submitDelete']: 
+                print "going to delete"
+                #ANNABEL: UNCOMMENT BELOW WHEN DONE DEBUGGING
+                #dbi.deleteSearchResult(conn, sid)
+            # get new information from entries on template then send to mysql
+                flash("Article with SID: " + str(sid) + " was removed from the database")
+                articleInfo = dbi.getArticleBySid(conn, sid)
+                return render_template('update_article.html', articleInfo=[])
+        if 'submitUpdate' in request.form:
+            #SUBMIT BUTTON IS NOT WORKING
+            print "submitting update request"
+            if 'update' in request.form['submitUpdate']: 
+                #BUG: it's deleting the current values and 
+                original = dbi.getArticleBySid(conn, sid)
+                if (original['url'] != request.form['url']) and (request.form['url'] != ""):
+                    dbi.updateArticleURL(conn, request.form['url'], sid)
+                if (original['resultDate'] != request.form['date']) and (request.form['date'] != ""):
+                    print "updating result date: " + str(request.form['date'])
+                    dbi.updateArticleResultDate(conn, request.form['date'], sid)
+                if (original['originQuery'] != request.form['oq']) and (request.form['oq'] != ""):
+                    dbi.updateArticleOriginQuery(conn, request.form['oq'], sid)
+                if (original['title'] != request.form['title']) and (request.form['title'] != ""):
+                     dbi.updateArticleTitle(conn, request.form['title'], sid)
+                #get new information from entries on template then send to mysql
+                articleInfo = dbi.getArticleBySid(conn, sid)
+                return render_template('update_article.html', articleInfo=articleInfo)
         articleInfo = dbi.getArticleBySid(conn, sid)
+        flash("No changes made, please change appropriate values or delete item, as desired")
         return render_template('update_article.html', articleInfo=articleInfo)
-    
 @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
 def deleteArticle(sid):
     '''Redirects to the page with pre-filled information to update for article'''
