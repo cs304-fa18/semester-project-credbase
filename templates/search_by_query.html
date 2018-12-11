@@ -1,19 +1,46 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
+<!--
 <form id="title-search" method=POST action= {{url_for('searchArticles')}}>
                 <input id="query-term" placeholder="Search" name="query-term">
                 <button id="search-query" type="submit" name="submit" value="Search">Search</button>
                 </form>
+-->
+
 <article id="query-results">
+    <table class="table">
+        <thead>
+            <tr>
+                <th scope="col">Article Title</th>
+                <th scope="col">Source</th>
+                <th scope="col">Origin Query</th>
+                <th scope="col">Result Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for article in articles %}
+            <tr scope="row">
+                <td scope="row"><a href="{{article.url}}">{{article.title}}</a></td>
+                <td scope="row"><a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a></td>
+                <td scope="row">{{article.originQuery}}</td>
+                <td scope="row">{{article.resultDate}}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <!--
     <ul>
         {% for article in articles %}
         <li>
             <a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a> published: 
-            <a href="{{article.url}}">{{article.title}}</a>
+            <a href="{{article.url}}">{{article.title}}</a> 
+            on {{article.resultDate}}, which showed up for the query: {{article.originQuery}}
+            
         </li>
         {% endfor %}
     </ul>
+    -->
 </article>
 
 {% endblock %}

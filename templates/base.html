@@ -13,10 +13,13 @@
     {% block header %}   
     <nav class="navbar navbar-fixed-top navbar-bootsnipp bg-light">
             <form class="form-inline" id="search" method=POST action= {{url_for('search')}}>
-                <input class="form-control" type="search" placeholder="Search" aria-label="Search" name="searchterm">
+                <input class="form-control" type="search" placeholder="Search a Source" aria-label="Search a Source" name="searchterm">
                 <button class="btn btn-primary my-2 my-sm-0" type="submit">Search</button>
             </form>
-            
+            <form class="form-inline" id="title-search" method=POST action= {{url_for('searchArticles')}}>
+                <input class="form-control" id="query-term" type="search" placeholder="Search a Topic" aria-label="Search a Subject" name="query-term">
+                <button class="btn btn-primary my-2 my-sm-0" id="search-query" type="submit" name="submit" value="Search">Search</button>
+            </form>
             <div>
                 <a class="navbar-brand text-dark" href="{{url_for('home')}}">CredBase</a>
             </div>

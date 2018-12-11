@@ -14,7 +14,7 @@
             </thead>
             <!-- Fills out movie table --> 
             {% for item in sources %}
-                <tr scope="row" data-id={{item.nsid}}>
+            <tr scope="row" data-id={{item.nsid}}>
                 <td scope="row" class="name">{{item.name}}</td>
                 <td scope="row" class="date">{{item.addDate}}</td>
                 <td scope="row"><button class="unwatch">Stop watching</button></td>

@@ -128,10 +128,10 @@ def newsSource(nsid):
     else:
         stories = dbi.getStoriesByNewsSource(conn, nsid)
         for story in stories:
-            story['url'] = unicode(story['url'], errors='ignore')
-            story['title'] = unicode(story['url'], errors='ignore')
-            story['originQuery'] = unicode(story['originQuery'], errors='ignore')
-            story['resultDate'] = unicode(story['resultDate'], errors='ignore')
+            print story
+            story['url'] = story['url'].decode('utf-8')
+            story['title'] = story['title'].decode('utf-8')
+            story['originQuery'] = story['originQuery'].decode('utf-8')
         return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
 
         
@@ -150,10 +150,9 @@ def searchArticles():
         articles = dbi.findArticlesByTopic(conn, title)
         for entry in articles:
             print entry
-            entry['url'] = unicode(entry['url'], errors='ignore')
-            entry['title'] = unicode(entry['title'], errors='ignore')
-            entry['name'] = unicode(entry['name'], errors='ignore')
-            print entry['name']
+            entry['url'] = entry['url'].decode('utf-8')
+            entry['title'] = entry['title'].decode('utf-8')
+            entry['name'] = entry['name'].decode('utf-8')
         return render_template('search_by_query.html', articles=articles)
     else:
         return render_template('search_by_query.html', articles=[])

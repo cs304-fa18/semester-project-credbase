@@ -65,7 +65,7 @@ def findArticlesByTopic(conn, title):
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     titleLike = str("%" + title + "%")
-    curs.execute('''select newsSource.nsid, newsSource.name, searchresults.url, searchresults.title from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
+    curs.execute('''select newsSource.nsid, newsSource.name, searchresults.url, searchresults.title, searchresults.resultDate, searchresults.originQuery from newsSource, searchresults where searchresults.title like %s and newsSource.nsid = searchresults.nsid''', [titleLike])
     return curs.fetchall()
     
     
