@@ -2,18 +2,17 @@
 {% block main %}
 <br>
 
-<p>Form to upload a file:
+<p>Upload a new JSON file of search results here:
 <form method="post" action="" enctype="multipart/form-data">
-    <p><label for="nm">NM: <input type="text" name="nm"></label></p>
-    <p><label for="pic">Pic: <input type="file" name="file"></label></p>
-    <p><label for="date">Date: <input type="text" name="date"></label></p>
-    <p><label for="query">Query: <input type="text" name="query"></label></p>
+    <p><label for="nm">Your CRED ID#: <input type="text" name="nm"></label></p>
+    <p><label for="pic">File: <input type="file" name="file"></label></p>
+    <p><label for="date">Enter date in form YYYY-MM-DD: <input type="text" name="date"></label></p>
+    <p><label for="query">Origin query: <input type="text" name="query"></label></p>
     <p><input type="submit" value="upload"></p>
 </form>
 
 {% if nm != '' and src != '' %}
 <p>Last upload: {{nm}}</p>
-<p> <img src="{{src}}"></p>
 {% endif %}
 
 {% endblock %}

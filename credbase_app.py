@@ -82,7 +82,7 @@ def file_upload():
             else:
                 flash("Upload Error: file must be of type JSON")
             if validJSON:
-                filename = secure_filename('{}.{}'.format(nm,"json"))
+                filename = secure_filename('{}{}.{}'.format(nm, query, "json"))
                 print "filename: " + filename
                 pathname = os.path.join(app.config['UPLOADS'],filename)
                 print "pathname: " + pathname
@@ -93,8 +93,7 @@ def file_upload():
                 curs = conn.cursor()
                 dbi.addFile(conn, nm, filename, query, date)
                 return render_template('upload_json.html',
-                                       src=url_for('file_upload',nm=nm),
-                                       nm=nm)
+                                       nm=filename)
             return render_template('upload_json.html',src='',nm='')
         except Exception as err:
             flash('Upload failed {why}'.format(why=err))
