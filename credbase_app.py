@@ -60,6 +60,10 @@ def user(username):
 
 @app.route('/upload/', methods=["GET", "POST"])
 def file_upload():
+    print session
+    if not 'username' in session:
+        flash("You must be logged in to use this feature")
+        render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     if request.method == 'GET':
         return render_template('upload_json.html',src='',nm='')
     else:
@@ -168,8 +172,10 @@ def searchArticles():
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
     #NOT THREAD SAFE -- NEED TO FIX
-    
-
+    print session
+    if not 'username' in session:
+        flash("You must be logged in to use this feature")
+        render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     '''Redirects to the page with pre-filled information to update for article'''
     #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
@@ -214,7 +220,9 @@ def updateArticle(sid):
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
 def updateSource(nsid):
     #NOT THREAD SAFE -- NEED TO FIX
-    
+    if not 'username' in session:
+        flash("You must be logged in to use this feature")
+        render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
 
     '''Redirects to the page with pre-filled information to update for source'''
     #need to do something so if all the original values are still in there, bc posting 
