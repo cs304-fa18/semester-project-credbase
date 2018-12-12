@@ -272,7 +272,7 @@ def updateSource(nsid):
                 if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
                      dbi.updateSourcePublisher(conn, request.form['publisher'], nsid)
                 #special case where may not have a media type value picked
-                if 'mediatype' in request.form['submitUpdate']:
+                if 'mediatype' in request.form:
                     if (original['mediatype'] != request.form['mediatype']) and (request.form['mediatype'] != ""):
                          print original['mediatype']
                          print request.form['mediatype']
