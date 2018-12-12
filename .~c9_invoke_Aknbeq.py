@@ -43,9 +43,9 @@ def getTups():
             url = "NULL"
         doe = "NULL"
         if entry != data[-1]:
-            tup = "(" + "NULL" + ", " + unicode(name, errors='ignore') + ", " + str(publisher) + ", " + str(mediatype) + ", " + str(location) + ", " + str(editor) + ", " + unicode(url, errors='ignore') + ", " + str(doe) +"), " 
+            tup = "(" + "NULL" + ", " + unico(name) + ", " + str(publisher) + ", " + str(mediatype) + ", " + str(location) + ", " + str(editor) + ", " + str(url) + ", " + str(doe) +"), " 
         else:
-            tup = "(" + "NULL" + ", " + unicode(name, errors='ignore') + ", " + str(publisher) + ", " + str(mediatype) + ", " + str(location) + ", " + str(editor) + ", " + unicode(url, errors='ignore') + ", " + str(doe) +")" 
+            tup = "(" + "NULL" + ", " + unicode(name) + ", " + str(publisher) + ", " + str(mediatype) + ", " + str(location) + ", " + str(editor) + ", " + unicode(url) + ", " + str(doe) +")" 
         outF.write(tup)
         #dbi.addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe)
         count += 1

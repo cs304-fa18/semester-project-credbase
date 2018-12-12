@@ -244,13 +244,13 @@ def updateSource(nsid):
     if request.method == "GET":
         print "METHOD WAS GET"
         sourceInfo = dbi.lookupNewsSource(conn, nsid)
-        try:
+        # try:
             #handing hex characters
-            sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-            sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-            return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-        except TypeError:
-            return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+            # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+            # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+        #     return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+        # except TypeError:
+        return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     
     
     if request.method == "POST":
@@ -260,9 +260,9 @@ def updateSource(nsid):
                 print "going to delete"
                 dbi.deleteSource(conn, nsid)
                 flash("Source with NSID: " + str(nsid) + " was removed from the database")
-                sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-                sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+                # sourceInfo = dbi.lookupNewsSource(conn, nsid)
+                # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+                # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
                 return render_template('update_source.html', page_title="Update Source", sourceInfo=[], login_session=session.get('name', 'Not logged in'))
         #otherwise update as appropriate
         if 'submitUpdate' in request.form:
@@ -288,17 +288,17 @@ def updateSource(nsid):
                 if (original['doe'] != request.form['doe']) and (request.form['doe'] != ""):
                      dbi.updateSourceDOE(conn, request.form['doe'], nsid)
                 sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                try:
-                    sourceInfo['url'] = unicode(sourceInfo['url'].decode, errors='ignore')
-                    sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-                    return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-                except TypeError:
-                    return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-       
+                # try:
+                #     sourceInfo['url'] = unicode(sourceInfo['url'].decode, errors='ignore')
+                #     sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+                #     return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+                # except TypeError:
                 return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+       
+                # return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     sourceInfo = dbi.lookupNewsSource(conn, nsid)
-    sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-    sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+    # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+    # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
     flash("No changes made, please change appropriate values or delete item, as desired")
     return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     
