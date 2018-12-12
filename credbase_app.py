@@ -45,27 +45,30 @@ def user(username):
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
-            username = session['username']
+            user = session['username']
+            if username != user:
+                flash('You are not logged in as this account. Switch accounts to proceed')
+                return redirect( url_for('home') )
             conn = dbi.connect('credbase')
-            user_info = dbi.lookupUser(conn, username)
-            sources = dbi.getWatchedNewsSources(conn, username)
+            user_info = dbi.lookupUser(conn, user)
+            sources = dbi.getWatchedNewsSources(conn, user)
             return render_template('user_page.html', page_title=user_info['name'], sources=sources, login_session=session.get('name', 'Not logged in'))
         else:
-            flash('you are not logged in. Please login or join')
+            flash('You are not logged in. Please login or join')
             return redirect( url_for('home') )
     except Exception as err:
-        flash('some kind of error '+str(err))
+        flash('Error: '+str(err))
         return redirect( url_for('home') )
 
 
 @app.route('/upload/', methods=["GET", "POST"])
 def file_upload():
     print session
-    if not 'username' in session:
+    if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     if request.method == 'GET':
-        return render_template('upload_json.html',src='',nm='')
+        return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
     else:
         try:
             nm = int(request.form['nm']) # may throw error
@@ -77,7 +80,7 @@ def file_upload():
                     flash('You must provide the query title')
                 if date == '':
                     flash('You must provide a date in format month-day-year, ex: 01-01-2018')
-                return render_template('upload_json.html',src='',nm='')
+                return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
             f = request.files['file']
             validJSON = False 
             # weak check to see if file is true json file
@@ -94,31 +97,15 @@ def file_upload():
                 print "saved file"
                 flash('Upload successful')
                 conn = dbi.connect('credbase')
-                curs = conn.cursor()
                 dbi.addFile(conn, nm, filename, query, date)
                 return render_template('upload_json.html',
-                                       nm=filename)
-            return render_template('upload_json.html',src='',nm='')
+                                       nm=filename, login_session=session.get('name', 'Not logged in'))
+            return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
         except Exception as err:
             flash('Upload failed {why}'.format(why=err))
-            return render_template('upload_json.html',src='',nm='')
+            return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
         
-        
-@app.route('/source/search/', defaults={'search_term':''})
-@app.route('/source/search/<search_term>')
-def newsSourceSearchResults(search_term):
-    """This page displays search results when there are multiple results that
-    satisfy the search query. If there is only one, it redirects to the page
-    of this news source. If there are none, it flashes the message"""
-    conn = dbi.connect('credbase')
-    search_results = dbi.getSearchedNewsSources(conn, search_term)
-    if len(search_results) == 1:
-        return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
-    elif len(search_results) == 0:
-        flash('Sorry, no news source with such name was found')
-    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
 
-    
 """News source information"""    
 @app.route('/source/<int:nsid>')
 def newsSource(nsid):
@@ -135,48 +122,78 @@ def newsSource(nsid):
                 story['url'] = unicode(story['url'], errors='ignore')
                 story['title'] = unicode(story['url'], errors='ignore')
                 story['originQuery'] = unicode(story['originQuery'], errors='ignore')
+                #WHY DO WE CONVERT DATE INTO UNICODE?
                 story['resultDate'] = unicode(story['resultDate'], errors='ignore')
-            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
+            return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
         #weird error, don't know why it's happening except if already decoded?
         except TypeError: 
             return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
-        
+
+
 @app.route('/search/', methods=['GET', 'POST'])
 def search():
     '''Redirects to the page with news source search results'''
-    search_term = request.form.get("searchterm")
-    return redirect(url_for('newsSourceSearchResults', search_term=search_term))
+    query = request.form.get("searchterm")
+    option = request.form.get('search-option')
     
-@app.route('/search-articles/', methods=['GET', 'POST'])
-def searchArticles():
-    '''Redirects to the page with article titles whose title is like the query'''
-    if request.method == "POST":
-        conn = dbi.connect('credbase') 
-        title = request.form.get("query-term")
-        print "search term: " + title
-        articles = dbi.findArticlesByTopic(conn, title)
-        try:
-            for entry in articles:
-                print entry
-                entry['url'] = unicode(entry['url'], errors='ignore')
-                entry['title'] = unicode(entry['title'], errors='ignore')
-                entry['name'] = unicode(entry['name'], errors='ignore')
-                print entry['name']
-            return render_template('search_by_query.html', articles=articles)
-        #don't know why error happens but it does and we handle it here
-        except TypeError: 
-            return render_template('search_by_query.html', articles=articles)
+    if option == 'source':
+        return redirect(url_for('searchNewsSources', search_term=query))
+    elif option == 'article':
+        return redirect(url_for('searchArticles', search_term=query))
     else:
-        return render_template('search_by_query.html', articles=[])
+        flash("Invalid url")
+        #We need to create not found page or something...
+        return redirect( url_for('home') )
+    
         
+@app.route('/search-sources/', defaults={'search_term':''})
+@app.route('/search-sources/<search_term>')
+def searchNewsSources(search_term):
+    """This page displays search results when there are multiple results that
+    satisfy the search query. If there is only one, it redirects to the page
+    of this news source. If there are none, it flashes the message"""
+    conn = dbi.connect('credbase')
+    search_results = dbi.getSearchedNewsSources(conn, search_term)
+    for entry in search_results:
+        print entry['name']
+        entry['name'] = unicode(entry['name'], errors='ignore')
+        
+    if len(search_results) == 1:
+        return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
+    elif len(search_results) == 0:
+        flash('Sorry, no news source with such name was found')
+    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
+
+
+@app.route('/search-articles/', defaults={'search_term':''})    
+@app.route('/search-articles/<search_term>', methods=['GET', 'POST'])
+def searchArticles(search_term):
+    '''This page displays article titles whose title is like the query'''
+    conn = dbi.connect('credbase') 
+    print "search term: " + search_term
+    articles = dbi.findArticlesByTopic(conn, search_term)
+    try:
+        for entry in articles:
+            print entry
+            entry['url'] = unicode(entry['url'], errors='ignore')
+            entry['title'] = unicode(entry['title'], errors='ignore')
+            entry['name'] = unicode(entry['name'], errors='ignore')
+            print entry['name']
+        return render_template('search_by_query.html', articles=articles, login_session=session.get('name', 'Not logged in'))
+    #don't know why error happens but it does and we handle it here
+    except TypeError: 
+        return render_template('search_by_query.html', articles=articles, login_session=session.get('name', 'Not logged in'))
+    
+    
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
     #NOT THREAD SAFE -- NEED TO FIX
     print session
-    if not 'username' in session:
+    if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
-    '''Redirects to the page with pre-filled information to update for article'''
+    
+    #'''Redirects to the page with pre-filled information to update for article'''
     #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
     if request.method == "GET":
@@ -184,10 +201,10 @@ def updateArticle(sid):
         try:
             articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
             articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
-            return render_template('update_article.html', articleInfo=articleInfo)
+            return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
         #again weird unicode error
         except TypeError:
-            return render_template('update_article.html', articleInfo=articleInfo)
+            return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
         if 'submitDelete' in request.form:
             if 'delete' in request.form['submitDelete']: 
@@ -197,7 +214,7 @@ def updateArticle(sid):
             # get new information from entries on template then send to mysql
                 flash("Article with SID: " + str(sid) + " was removed from the database")
                 articleInfo = dbi.getArticleBySid(conn, sid)
-                return render_template('update_article.html', articleInfo=[])
+                return render_template('update_article.html', articleInfo=[], login_session=session.get('name', 'Not logged in'))
         if 'submitUpdate' in request.form:
             if 'update' in request.form['submitUpdate']: 
                 original = dbi.getArticleBySid(conn, sid)
@@ -211,20 +228,20 @@ def updateArticle(sid):
                 if (original['title'] != request.form['title']) and (request.form['title'] != ""):
                      dbi.updateArticleTitle(conn, request.form['title'], sid)
                 articleInfo = dbi.getArticleBySid(conn, sid)
-                return render_template('update_article.html', articleInfo=articleInfo)
+                return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     articleInfo = dbi.getArticleBySid(conn, sid)
     #can't actually flash bc confusing with post methods
-    #flash("No changes made, please change appropriate values or delete item, as desired")
-    return render_template('update_article.html', articleInfo=articleInfo)
+    flash("No changes made, please change appropriate values or delete item, as desired")
+    return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
 
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
 def updateSource(nsid):
     #NOT THREAD SAFE -- NEED TO FIX
-    if not 'username' in session:
+    if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
 
-    '''Redirects to the page with pre-filled information to update for source'''
+    #'''Redirects to the page with pre-filled information to update for source'''
     #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
     if request.method == "GET":
@@ -232,10 +249,10 @@ def updateSource(nsid):
         try:
             sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
             sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-            return render_template('update_source.html', sourceInfo=sourceInfo)
+            return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
         #again weird unicode error
         except TypeError:
-            return render_template('update_source.html', sourceInfo=sourceInfo)
+            return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
         if 'submitDelete' in request.form:
             if 'delete' in request.form['submitDelete']: 
@@ -245,10 +262,11 @@ def updateSource(nsid):
             # get new information from entries on template then send to mysql
                 flash("Source with NSID: " + str(nsid) + " was removed from the database")
                 sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                return render_template('update_source.html', sourceInfo=[])
+                return render_template('update_source.html', sourceInfo=[], login_session=session.get('name', 'Not logged in'))
         if 'submitUpdate' in request.form:
             if 'update' in request.form['submitUpdate']: 
                 original = dbi.lookupNewsSource(conn, nsid)
+                print original
                 if (original['name'] != request.form['name']) and (request.form['name'] != ""):
                      dbi.updateSourceName(conn, request.form['name'], nsid)
                 if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
@@ -268,19 +286,18 @@ def updateSource(nsid):
                 if (original['doe'] != request.form['doe']) and (request.form['doe'] != ""):
                      dbi.updateSourceDOE(conn, request.form['doe'], nsid)
                 sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                return render_template('update_source.html', sourceInfo=sourceInfo)
+                return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     sourceInfo = dbi.lookupNewsSource(conn, nsid)
     #can't actually flash bc confusing with post methods
-    #flash("No changes made, please change appropriate values or delete item, as desired")
-    return render_template('update_source.html', sourceInfo=sourceInfo)
+    flash("No changes made, please change appropriate values or delete item, as desired")
+    return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
 
-
-        
-@app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
-def deleteArticle(sid):
-    '''Redirects to the page with pre-filled information to update for article'''
-    conn = dbi.connect('credbase') 
-    return render_template('delete_article.html')
+# '''COMMENTED OUT - KHONZODA'''        
+# @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
+# def deleteArticle(sid):
+#     '''Redirects to the page with pre-filled information to update for article'''
+#     conn = dbi.connect('credbase') 
+#     return render_template('delete_article.html')
 
 ##-------------------# Pages for session/login management #-------------------##
 @app.route('/login/', methods = ['POST'])

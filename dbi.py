@@ -81,7 +81,7 @@ def getSearchedNewsSources(conn, searchTerm):
     return curs.fetchall()
 
 def getArticleBySid(conn, sid):
-    """Searches the database for article with matching nsid"""
+    """Searches the database for article with matching sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from searchresults where sid = %s''', [sid])
     #annabel was debugging using returnVal, delete later
@@ -225,7 +225,7 @@ def addMBF(conn, tupList):
 
 #file methods
 def addFile(conn, nm, filename, query, date):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    # curs = conn.cursor(MySQLdb.cursors.DictCursor)
     #annabel: uncomment below line when uploading thru web interface
     #curs.execute('''insert into json(nm,filename) values (%s,%s)
     #                            on duplicate key update filename = %s''',
