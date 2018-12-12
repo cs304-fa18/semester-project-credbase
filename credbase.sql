@@ -60,7 +60,7 @@ CREATE TABLE wikipedia (
 -- drop table if exists user;
 CREATE TABLE user(
     name varchar(60),
-    username varchar(10),
+    username varchar(20),
     access enum("admin", "regular"),
     hashedPWD varchar(60),
     primary key (username)

@@ -2,6 +2,9 @@
 
 {% block main %}
     <div>
+        
+        <p><a href="{{url_for('file_upload')}}">Click here</a> to upload a new JSON file of search results.</p>
+        <p><a href="{{url_for('addSource')}}">Click here</a> to add a new news source.</p>
         <p>Here are the news sources on your watchlist</p>
         
         <table class="table" id="watchlist">
@@ -12,7 +15,6 @@
                 <th scope="col"> </th>
             </tr>
             </thead>
-            <!-- Fills out movie table --> 
             {% for item in sources %}
             <tr scope="row" data-id={{item.nsid}}>
                 <td scope="row" class="name">{{item.name}}</td>
