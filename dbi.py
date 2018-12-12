@@ -263,7 +263,12 @@ if __name__ == '__main__':
     conn = connect('credbase')
     #print mediaBias_intoNS.getTups()[0]
     #addMBF(conn, mediaBias_intoNS.getTups())
-    addFile(conn, 123, "Trump wall.json", "Trump wall", "2018-01-01")
+    # addFile(conn, 123, "Trump wall.json", "Trump wall", "2018-01-01")
     #result = getWatchedNewsSources(conn, "123")
     #print(len(result))
-
+    #THESE ARE ALREADY ADDED
+    # addFile(conn, 123, "Men women pay gap.json", "Men women pay gap", "2018-06-22")
+    # addFile(conn, 123, "female Phd.json", "female Phd", "2018-08-19")
+    # addFile(conn, 123, "Global warming real.json", "Global warming real", "2018-10-07")
+    # addFile(conn, 123, "Big data.json", "What is daca", "2018-10-07")
+    
