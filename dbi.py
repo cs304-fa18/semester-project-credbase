@@ -51,8 +51,11 @@ def getSimilar(conn, nsid):
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables searchresults write''')
     curs.execute('''select * from searchresults where nsid = %s''', [nsid])
-    return curs.fetchall()
+    returnVal = curs.fetchall()
+    curs.execute('''unlock tables''')
+    return returnVal
     
 def getNewsSourceByURL(conn, url):   
     """Extracts stories/search results that come from the given news source"""
@@ -261,6 +264,8 @@ def addFile(conn, nm, filename, query, date):
 
 if __name__ == '__main__':
     conn = connect('credbase')
+    returnVal = getStoriesByNewsSource(conn, 91)
+    print returnVal
     #print mediaBias_intoNS.getTups()[0]
     #addMBF(conn, mediaBias_intoNS.getTups())
     # addFile(conn, 123, "Trump wall.json", "Trump wall", "2018-01-01")
