@@ -51,10 +51,11 @@ def getSimilar(conn, nsid):
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables searchresults write''')
+    #NO NEED THIS IS READ ONLY
+    # curs.execute('''lock tables searchresults write''')
     curs.execute('''select * from searchresults where nsid = %s''', [nsid])
     returnVal = curs.fetchall()
-    curs.execute('''unlock tables''')
+    # curs.execute('''unlock tables''')
     return returnVal
     
 def getNewsSourceByURL(conn, url):   
@@ -207,8 +208,16 @@ def checkUserPass(conn, username):
     
 def addUser(conn, name, username, hashed):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''insert into user(name,username,access,hashedPWD) values(%s,%s,'regular',%s)''',
+    curs.execute('''lock tables user write''')
+    curs.execute('''select hashedPWD, name from user where username = %s''',
+                     [username])
+    if curs.fetchone() is not None:
+        return False
+    if curs.fetchone() == None:
+        curs.execute('''insert into user(name,username,access,hashedPWD) values(%s,%s,'regular',%s)''',
                      [name, username, hashed])
+    curs.execute('''unlock tables''')
+    return True
                      
 def addStory(conn, query, date, url, title, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
