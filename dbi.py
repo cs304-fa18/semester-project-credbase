@@ -51,11 +51,8 @@ def getSimilar(conn, nsid):
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables searchresults write''')
     curs.execute('''select * from searchresults where nsid = %s''', [nsid])
-    returnVal = curs.fetchall()
-    curs.execute('''unlock tables''')
-    return returnVal
+    return curs.fetchall()
     
 def getNewsSourceByURL(conn, url):   
     """Extracts stories/search results that come from the given news source"""
@@ -96,40 +93,52 @@ def getArticleBySid(conn, sid):
 def deleteSearchResult(conn, sid):
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables searchresults write''')
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
+    curs.execute('''unlock tables''')
     
 #delete source from database
 def deleteSource(conn, nsid):
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables newsSource write''')
     curs.execute ('''delete from newsSource where nsid=%s''', [nsid])
+    curs.execute('''unlock tables''')
     
 #article update methods, separated for clarity, not necessarily efficient
 def updateArticleTitle(conn, title, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set title = %s where sid = %s''', [title, sid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
 def updateArticleURL(conn, url, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set url = %s where sid = %s''', [url, sid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
 def updateArticleResultDate(conn, date, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set resultDate = %s where sid = %s''', [date, sid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
 
 def updateArticleOriginQuery(conn, oq, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set originQuery = %s where sid = %s''', [oq, sid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
 
@@ -138,42 +147,54 @@ def updateArticleOriginQuery(conn, oq, sid):
 def updateSourceName(conn, name, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set name = %s where nsid = %s''', [name, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
 def updateSourcePublisher(conn, publisher, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set publisher = %s where nsid = %s''', [publisher, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
 def updateSourceMediatype(conn, mediatype, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set mediatype = %s where nsid = %s''', [mediatype, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
 def updateSourceLocation(conn, location, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set location = %s where nsid = %s''', [location, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
  
 def updateSourceEditor(conn, editor, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set editor = %s where nsid = %s''', [editor, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
         
 def updateSourceURL(conn, url, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set url = %s where nsid = %s''', [url, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
         
@@ -181,7 +202,9 @@ def updateSourceURL(conn, url, nsid):
 def updateSourceDOE(conn, doe, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set doe = %s where nsid = %s''', [doe, nsid])
+        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
 
@@ -207,24 +230,32 @@ def checkUserPass(conn, username):
     
 def addUser(conn, name, username, hashed):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables user write''')
     curs.execute('''insert into user(name,username,access,hashedPWD) values(%s,%s,'regular',%s)''',
                      [name, username, hashed])
+    curs.execute('''unlock tables''')
                      
 def addStory(conn, query, date, url, title, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables searchresults write''')
     curs.execute('''insert into searchresults(title,originQuery,resultDate,url,nsid) values(%s,%s,%s,%s,%s)''',
                      [title, query, date, url, nsid])
+    curs.execute('''unlock tables''')
 
 def addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables newsSource write''')
     curs.execute('''insert into newsSource(nsid,name,publisher,mediatype,location,editor,url,doe) values(%s,%s,%s,%s,%s,%s,%s,%s)''',
                      [None, name, publisher, mediatype, location, editor, url, doe])
+    curs.execute('''unlock tables''')
 
 def addMBF(conn, tupList):
     for entry in tupList:
         curs = conn.cursor(MySQLdb.cursors.DictCursor)
+        curs.execute('''lock tables newsSource write''')
         curs.execute('''insert into newsSource(nsid,name,publisher,mediatype,location,editor,url,doe) values (%s,%s,%s,%s,%s,%s,%s,%s)''',
                      [entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6],entry[7]])
+        curs.execute('''unlock tables''')
 
 #file methods
 def addFile(conn, nm, filename, query, date):

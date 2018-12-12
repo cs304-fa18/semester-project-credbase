@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block main %}
+<br>
+
+<p>Update Source 
+<form method="post" action="" enctype="multipart/form-data">
+    <p><label for="name">Name: <input type="text" name="name"></label></p>
+    <p><label for="publisher">Publisher: <input type="text" name="publisher"></label></p>
+    <p><label for="location">Location: <input type="text" name="location"></label></p>
+    <p><label for="editor">Editor: <input type="text" name="editor"></label></p>
+    <p><label for="doe">Date of Establishment (YYYY form, ex: 1983): <input type="text" name="doe"></label></p>
+    <p><label for="url">URL: <input type="text" name="url"></label></p>
+    Media Type: 
+    <p><input type="radio" name="mediatype" value="newspaper"> Newspaper </p>
+    <p><input type="radio" name="mediatype" value="magazine"> Magazine </p>
+    <p><input type="radio" name="mediatype" value="radio/tv"> Radio/TV </p>
+    <p><input type="radio" name="mediatype" value="blog"> Blog </p>
+    <p><input type="radio" name="mediatype" value="website"> Website or Web-based </p>
+    <p><label for="add">Add Source<input id="addSource" type="submit" name="submitSourceAdd" value="add"></label></p>
+
+</form>
+
+<script>
+    /*global $*/
+    
+</script>
+
+{% endblock %}

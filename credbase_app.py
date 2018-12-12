@@ -291,7 +291,57 @@ def updateSource(nsid):
     #can't actually flash bc confusing with post methods
     flash("No changes made, please change appropriate values or delete item, as desired")
     return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-
+    
+    
+@app.route('/add-source/', methods=['GET', 'POST'])
+def addSource():
+    #NOT THREAD SAFE -- NEED TO FIX
+    if 'username' not in session:
+        flash("You must be logged in to use this feature")
+        return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
+    conn = dbi.connect('credbase') 
+    #if get, just give page to fill in input
+    if request.method == "GET":
+        return render_template('add_source.html', login_session=session.get('name', 'Not logged in'))
+    else:
+        if 'submitSourceAdd' in request.form:
+            print request.form
+            if 'add' in request.form['submitSourceAdd']:
+                #ugly, maybe better way to do this, checking for None values
+                if request.form['name'] == "":
+                    flash("Your source must have a name")
+                    return render_template('add_source.html',login_session=session.get('name', 'Not logged in'))
+                else:
+                    name = request.form['name']
+                if request.form['publisher'] == "":
+                    publisher = None
+                else:
+                    publisher = request.form['publisher']
+                #have to handle mediatype specially bc radio button
+                if 'mediatype' not in request.form['submitSourceAdd']:
+                    mediatype = None
+                else:
+                    mediatype = request.form['mediatype']
+                if request.form['location'] == "":
+                    location = None
+                else:
+                    location = request.form['location']
+                if request.form['editor'] == "":
+                    editor = None
+                else:
+                    editor = request.form['editor']
+                if request.form['url'] == "":
+                    url = None
+                else:
+                    url = request.form['url']
+                if request.form['doe'] == "":
+                    doe = None
+                else:
+                    doe = request.form['doe']
+                dbi.addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe)
+                flash("New news source " + name + " was successfully added.")
+                return render_template('add_source.html',login_session=session.get('name', 'Not logged in'))
+                
 # '''COMMENTED OUT - KHONZODA'''        
 # @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
 # def deleteArticle(sid):
