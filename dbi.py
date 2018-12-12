@@ -62,6 +62,7 @@ def getNewsSourceByURL(conn, url):
     curs.execute('''select nsid from newsSource where url like %s''', [urlLike])
     return curs.fetchone()
 
+
 def findArticlesByTopic(conn, title):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -87,6 +88,7 @@ def getArticleBySid(conn, sid):
     curs.execute('''select * from searchresults where sid = %s''', [sid])
     return curs.fetchone()
 
+
 def deleteSearchResult(conn, sid):
     """Allows user to delete search result from the database"""
     conn = connect("credbase")
@@ -95,6 +97,7 @@ def deleteSearchResult(conn, sid):
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
     curs.execute('''unlock tables''')
     
+
 def deleteSource(conn, nsid):
     """Allows users to delete news source"""
     conn = connect("credbase")
@@ -103,13 +106,13 @@ def deleteSource(conn, nsid):
     curs.execute ('''delete from newsSource where nsid=%s''', [nsid])
     curs.execute('''unlock tables''')
     
+
 """*********************************************************************
 The following methods handle updating each component of the article or source
 individually. This probably isn't the most efficient way to handle the 
 situation, but I chose to do so for clarity and to be explicit. I will 
 look into cleaning this up for the beta version. -- Annabel
 ************************************************************************"""
-    
 def updateArticleTitle(conn, title, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
@@ -268,10 +271,6 @@ def addMBF(conn, tupList):
 """Lets user upload a new JSON file to the database"""
 def addFile(conn, nm, filename, query, date):
     #save file in json table for reference
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''insert into json(nm,filename) values (%s,%s)
-                                on duplicate key update filename = %s''',
-                            [nm, filename, filename])
     with open("uploads/"+filename) as data_file:
 	    data = json.load(data_file)
 	#using pandas isn't necessary here, but was helpful for visual aspects
@@ -283,6 +282,7 @@ def addFile(conn, nm, filename, query, date):
     df4 = pd.DataFrame(data["page_4"])
     
     df = pd.concat([df0, df1, df2, df3, df4], ignore_index=True)
+
 
     conn = connect('credbase')
     for row, column in df.iterrows():
@@ -299,6 +299,9 @@ def addFile(conn, nm, filename, query, date):
         #Annabel: I should build this for beta version
         addStory(conn, query, date, url, title, nsid)
 
+    
+    
+    
 if __name__ == '__main__':
     conn = connect('credbase')
     returnVal = getStoriesByNewsSource(conn, 91)

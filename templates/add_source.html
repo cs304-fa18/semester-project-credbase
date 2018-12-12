@@ -2,23 +2,107 @@
 {% block main %}
 <br>
 
-<p>Update Source 
-<form method="post" action="" enctype="multipart/form-data">
-    <p><label for="name">Name: <input type="text" name="name"></label></p>
-    <p><label for="publisher">Publisher: <input type="text" name="publisher"></label></p>
-    <p><label for="location">Location: <input type="text" name="location"></label></p>
-    <p><label for="editor">Editor: <input type="text" name="editor"></label></p>
-    <p><label for="doe">Date of Establishment (YYYY form, ex: 1983): <input type="text" name="doe"></label></p>
-    <p><label for="url">URL: <input type="text" name="url"></label></p>
-    Media Type: 
-    <p><input type="radio" name="mediatype" value="newspaper"> Newspaper </p>
-    <p><input type="radio" name="mediatype" value="magazine"> Magazine </p>
-    <p><input type="radio" name="mediatype" value="radio/tv"> Radio/TV </p>
-    <p><input type="radio" name="mediatype" value="blog"> Blog </p>
-    <p><input type="radio" name="mediatype" value="website"> Website or Web-based </p>
-    <p><label for="add">Add Source<input id="addSource" type="submit" name="submitSourceAdd" value="add"></label></p>
+<!--<p>Update Source -->
+<!--<form method="post" action="" enctype="multipart/form-data">-->
+<!--    <p><label for="name">Name: <input type="text" name="name"></label></p>-->
+<!--    <p><label for="publisher">Publisher: <input type="text" name="publisher"></label></p>-->
+<!--    <p><label for="location">Location: <input type="text" name="location"></label></p>-->
+<!--    <p><label for="editor">Editor: <input type="text" name="editor"></label></p>-->
+<!--    <p><label for="doe">Date of Establishment (YYYY form, ex: 1983): <input type="text" name="doe"></label></p>-->
+<!--    <p><label for="url">URL: <input type="text" name="url"></label></p>-->
+<!--    Media Type: -->
+<!--    <p><input type="radio" name="mediatype" value="newspaper"> Newspaper </p>-->
+<!--    <p><input type="radio" name="mediatype" value="magazine"> Magazine </p>-->
+<!--    <p><input type="radio" name="mediatype" value="radio/tv"> Radio/TV </p>-->
+<!--    <p><input type="radio" name="mediatype" value="blog"> Blog </p>-->
+<!--    <p><input type="radio" name="mediatype" value="website"> Website or Web-based </p>-->
+<!--    <p><label for="add">Add Source<input id="addSource" type="submit" name="submitSourceAdd" value="add"></label></p>-->
+<!--</form>-->
 
+<form method="post" action="" enctype="multipart/form-data">
+    <div class="form-group row">
+        <label for="name" class="col-md-2 col-form-label">Name</label>
+        <div class="col-md-4">
+            <input type="text" name="name" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="publisher" class="col-md-2 col-form-label">Publisher</label>
+        <div class="col-md-4">
+            <input type="text" name="publisher" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="location" class="col-md-2 col-form-label">Location</label>
+        <div class="col-md-4">
+            <input type="text" name="location" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="editor" class="col-md-2 col-form-label">Editor</label>
+        <div class="col-md-4">
+            <input type="text" name="editor" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="doe" class="col-md-2 col-form-label">Date of Establishment (YYYY form, ex: 1983)</label>
+        <div class="col-md-4">
+            <input type="text" name="doe" class="form-control">
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="url" class="col-md-2 col-form-label">URL</label>
+        <div class="col-md-4">
+            <input type="text" name="url" class="form-control">
+        </div>
+    </div>
+    
+    <fieldset class="form-group">
+    <div class="row">
+      <legend class="col-md-2 col-form-label">Media Type</legend>
+      <div class="col-md-4">
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mediatype" id="gridCheck1" value="website">
+          <label class="form-check-label">
+            Website or Web-based
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mediatype" id="gridCheck2" value="newspaper">
+          <label class="form-check-label">
+            Newspaper
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mediatype" id="gridCheck3" value="magazine">
+          <label class="form-check-label">
+            Magazine
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mediatype" id="gridCheck4" value="radio/tv">
+          <label class="form-check-label">
+            Radio/TV 
+          </label>
+        </div>
+        <div class="form-check">
+          <input class="form-check-input" type="radio" name="mediatype" id="gridCheck5" value="blog">
+          <label class="form-check-label">
+            Blog
+          </label>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+    
+  <div class="form-group row col-md-6">
+        <div class="col-md-2">
+            <input id="addSource" class="btn btn-primary" type="submit" name="submitSourceAdd" value="add">
+        </div>
+    </div>
 </form>
+
+
 
 <script>
     /*global $*/
