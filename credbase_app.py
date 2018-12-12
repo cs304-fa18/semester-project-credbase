@@ -15,7 +15,6 @@ from flask import (Flask, url_for, redirect, request, render_template, session,
 #files -- annabel
 from werkzeug import secure_filename
 import os
-import imghdr
 import json
 import mediaBias_intoNS
 #import python files that do the lookup
@@ -60,17 +59,21 @@ def user(username):
         flash('Error: '+str(err))
         return redirect( url_for('home') )
 
-
+'''Allows a logged-in user to upload a new JSON file of search results'''
 @app.route('/upload/', methods=["GET", "POST"])
 def file_upload():
     print session
+    #check that user is logged in
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
+    #if method is GET, just render the empty page
     if request.method == 'GET':
         return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
     else:
+        #catch any upload errors
         try:
+            #gets CRED-ID
             nm = int(request.form['nm']) # may throw error
             query = request.form['query']
             date = request.form['date']
@@ -82,19 +85,16 @@ def file_upload():
                     flash('You must provide a date in format month-day-year, ex: 01-01-2018')
                 return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
             f = request.files['file']
+            #check to see if file is indeed a JSON file, just checks extension
             validJSON = False 
-            # weak check to see if file is true json file
             if f.content_type == "application/json":
                 validJSON = True
             else:
                 flash("Upload Error: file must be of type JSON")
             if validJSON:
                 filename = secure_filename('{}{}.{}'.format(nm, query, "json"))
-                print "filename: " + filename
                 pathname = os.path.join(app.config['UPLOADS'],filename)
-                print "pathname: " + pathname
                 f.save(pathname)
-                print "saved file"
                 flash('Upload successful')
                 conn = dbi.connect('credbase')
                 dbi.addFile(conn, nm, filename, query, date)
@@ -106,7 +106,7 @@ def file_upload():
             return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
         
 
-"""News source information"""    
+"""Returns information on a news source, given NSID (news source ID)"""    
 @app.route('/source/<int:nsid>')
 def newsSource(nsid):
     conn = dbi.connect('credbase')
@@ -117,22 +117,21 @@ def newsSource(nsid):
         return redirect( url_for('home') )
     else:
         stories = dbi.getStoriesByNewsSource(conn, nsid)
+        #handle error that sometimes occurs, with unicode (some titles and URLs have hex characters in them)
         try:
             for story in stories:
                 story['url'] = unicode(story['url'], errors='ignore')
                 story['title'] = unicode(story['url'], errors='ignore')
                 story['originQuery'] = unicode(story['originQuery'], errors='ignore')
-                #WHY DO WE CONVERT DATE INTO UNICODE?
                 story['resultDate'] = unicode(story['resultDate'], errors='ignore')
             return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
-        #weird error, don't know why it's happening except if already decoded?
+        #sometimes have errors turning into unicode if already converted
         except TypeError: 
             return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session.get('name', 'Not logged in'))
 
-
+'''Search for a news source by name'''
 @app.route('/search/', methods=['GET', 'POST'])
 def search():
-    '''Redirects to the page with news source search results'''
     query = request.form.get("searchterm")
     option = request.form.get('search-option')
     
@@ -184,40 +183,39 @@ def searchArticles(search_term):
     except TypeError: 
         return render_template('search_by_query.html', articles=articles, login_session=session.get('name', 'Not logged in'))
     
-    
+'''Allows logged-in user to update articles (ie members of search results)'''    
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
-    #NOT THREAD SAFE -- NEED TO FIX
-    print session
+    #NOT THREAD SAFE -- NEED TO FIX (should be fixed now - ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     
-    #'''Redirects to the page with pre-filled information to update for article'''
-    #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
     if request.method == "GET":
         articleInfo = dbi.getArticleBySid(conn, sid)
+        #handling case of hex characters in titles and URLs
         try:
             articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
             articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
             return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
-        #again weird unicode error
+        #handle case where already converted
         except TypeError:
             return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
+        #if user wants to delete the article 
         if 'submitDelete' in request.form:
             if 'delete' in request.form['submitDelete']: 
                 print "going to delete"
-                #ANNABEL: UNCOMMENT BELOW WHEN DONE DEBUGGING
                 dbi.deleteSearchResult(conn, sid)
-            # get new information from entries on template then send to mysql
                 flash("Article with SID: " + str(sid) + " was removed from the database")
                 articleInfo = dbi.getArticleBySid(conn, sid)
                 return render_template('update_article.html', articleInfo=[], login_session=session.get('name', 'Not logged in'))
+        #if user wants to update elements of the article's entry
         if 'submitUpdate' in request.form:
             if 'update' in request.form['submitUpdate']: 
                 original = dbi.getArticleBySid(conn, sid)
+                #check to see that original and current values don't match before updating
                 if (original['url'] != request.form['url']) and (request.form['url'] != ""):
                     dbi.updateArticleURL(conn, request.form['url'], sid)
                 if (original['resultDate'] != request.form['date']) and (request.form['date'] != ""):
@@ -230,39 +228,37 @@ def updateArticle(sid):
                 articleInfo = dbi.getArticleBySid(conn, sid)
                 return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     articleInfo = dbi.getArticleBySid(conn, sid)
-    #can't actually flash bc confusing with post methods
     flash("No changes made, please change appropriate values or delete item, as desired")
     return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
 
+'''Logged-in users can update a source, to fix inaccuracies.'''
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
 def updateSource(nsid):
-    #NOT THREAD SAFE -- NEED TO FIX
+    #NOT THREAD SAFE -- NEED TO FIX (should be fixed, ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
 
-    #'''Redirects to the page with pre-filled information to update for source'''
-    #need to do something so if all the original values are still in there, bc posting 
     conn = dbi.connect('credbase') 
     if request.method == "GET":
         sourceInfo = dbi.lookupNewsSource(conn, nsid)
+        #handing hex characters
         try:
             sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
             sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
             return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-        #again weird unicode error
         except TypeError:
             return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
+        #delete if user wants
         if 'submitDelete' in request.form:
             if 'delete' in request.form['submitDelete']: 
                 print "going to delete"
-                #ANNABEL: UNCOMMENT BELOW WHEN DONE DEBUGGING
                 dbi.deleteSource(conn, nsid)
-            # get new information from entries on template then send to mysql
                 flash("Source with NSID: " + str(nsid) + " was removed from the database")
                 sourceInfo = dbi.lookupNewsSource(conn, nsid)
                 return render_template('update_source.html', sourceInfo=[], login_session=session.get('name', 'Not logged in'))
+        #otherwise update as appropriate
         if 'submitUpdate' in request.form:
             if 'update' in request.form['submitUpdate']: 
                 original = dbi.lookupNewsSource(conn, nsid)
@@ -271,7 +267,7 @@ def updateSource(nsid):
                      dbi.updateSourceName(conn, request.form['name'], nsid)
                 if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
                      dbi.updateSourcePublisher(conn, request.form['publisher'], nsid)
-                #special case where may not have a media type value picked
+                #special case where may not have a mediatype value picked
                 if 'mediatype' in request.form:
                     if (original['mediatype'] != request.form['mediatype']) and (request.form['mediatype'] != ""):
                          print original['mediatype']
@@ -288,27 +284,27 @@ def updateSource(nsid):
                 sourceInfo = dbi.lookupNewsSource(conn, nsid)
                 return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     sourceInfo = dbi.lookupNewsSource(conn, nsid)
-    #can't actually flash bc confusing with post methods
     flash("No changes made, please change appropriate values or delete item, as desired")
     return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     
-    
+'''Logged-in users can add a new source.'''    
 @app.route('/add-source/', methods=['GET', 'POST'])
 def addSource():
-    #NOT THREAD SAFE -- NEED TO FIX
+    #NOT THREAD SAFE -- NEED TO FIX (should be fixed, ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     conn = dbi.connect('credbase') 
-    #if get, just give page to fill in input
     if request.method == "GET":
         return render_template('add_source.html', login_session=session.get('name', 'Not logged in'))
     else:
         if 'submitSourceAdd' in request.form:
             print request.form
             if 'add' in request.form['submitSourceAdd']:
-                #ugly, maybe better way to do this, checking for None values
+                #ARR: this is ugly code, might be a better way to check for None values...
+                #I'll keep pondering 
                 if request.form['name'] == "":
+                    #only mandatory information for a source is a name
                     flash("Your source must have a name")
                     return render_template('add_source.html',login_session=session.get('name', 'Not logged in'))
                 else:

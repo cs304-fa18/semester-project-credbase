@@ -51,11 +51,8 @@ def getSimilar(conn, nsid):
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    #NO NEED THIS IS READ ONLY
-    # curs.execute('''lock tables searchresults write''')
     curs.execute('''select * from searchresults where nsid = %s''', [nsid])
     returnVal = curs.fetchall()
-    # curs.execute('''unlock tables''')
     return returnVal
 
 def getNewsSourceByURL(conn, url):   
@@ -88,28 +85,31 @@ def getArticleBySid(conn, sid):
     """Searches the database for article with matching sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from searchresults where sid = %s''', [sid])
-    #annabel was debugging using returnVal, delete later
-    returnVal =  curs.fetchone()
-    print returnVal
-    return returnVal
+    return curs.fetchone()
 
-#delete article from database
 def deleteSearchResult(conn, sid):
+    """Allows user to delete search result from the database"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables searchresults write''')
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
     curs.execute('''unlock tables''')
     
-#delete source from database
 def deleteSource(conn, nsid):
+    """Allows users to delete news source"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables newsSource write''')
     curs.execute ('''delete from newsSource where nsid=%s''', [nsid])
     curs.execute('''unlock tables''')
     
-#article update methods, separated for clarity, not necessarily efficient
+"""*********************************************************************
+The following methods handle updating each component of the article or source
+individually. This probably isn't the most efficient way to handle the 
+situation, but I chose to do so for clarity and to be explicit. I will 
+look into cleaning this up for the beta version. -- Annabel
+************************************************************************"""
+    
 def updateArticleTitle(conn, title, sid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
@@ -146,8 +146,6 @@ def updateArticleOriginQuery(conn, oq, sid):
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
 
-#update source methods, many for clarity:
-#there's a way to do this with sql replace field but I can't make it work
 def updateSourceName(conn, name, nsid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
@@ -267,16 +265,17 @@ def addMBF(conn, tupList):
                      [entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6],entry[7]])
         curs.execute('''unlock tables''')
 
-#file methods
+"""Lets user upload a new JSON file to the database"""
 def addFile(conn, nm, filename, query, date):
-    # curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    #annabel: uncomment below line when uploading thru web interface
-    #curs.execute('''insert into json(nm,filename) values (%s,%s)
-    #                            on duplicate key update filename = %s''',
-    #                        [nm, filename, filename])
+    #save file in json table for reference
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''insert into json(nm,filename) values (%s,%s)
+                                on duplicate key update filename = %s''',
+                            [nm, filename, filename])
     with open("uploads/"+filename) as data_file:
 	    data = json.load(data_file)
-	#crap coding but not sure how to fix -- JSON probs
+	#using pandas isn't necessary here, but was helpful for visual aspects
+	#the below dataframe operations are messy, could be clarified
     df0 = pd.DataFrame(data["page_0"])
     df1 = pd.DataFrame(data["page_1"])
     df2 = pd.DataFrame(data["page_2"])
@@ -285,23 +284,20 @@ def addFile(conn, nm, filename, query, date):
     
     df = pd.concat([df0, df1, df2, df3, df4], ignore_index=True)
 
-    print df
-    
     conn = connect('credbase')
-    #will need to do some kind of nsid matching process (if in list from media bias factcheck)
     for row, column in df.iterrows():
-        #add data in form 
+        #encode -- handles hex characters
         title = df.iloc[row][0].encode('utf-8')
         url = df.iloc[row][1].encode('utf-8')
+        #begin matching process to potential news source
         potentialNSID = getNewsSourceByURL(conn, urlparse(url).netloc)
         if potentialNSID == None:
             nsid = None
         else:
             nsid = str(potentialNSID['nsid']).encode('utf-8')
         # in future want to add new news source to newsSource
+        #Annabel: I should build this for beta version
         addStory(conn, query, date, url, title, nsid)
-
-    #remove file once we've read search results from it
 
 if __name__ == '__main__':
     conn = connect('credbase')
