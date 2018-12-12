@@ -62,6 +62,7 @@ def user(username):
 '''Allows a logged-in user to upload a new JSON file of search results'''
 @app.route('/upload/', methods=["GET", "POST"])
 def file_upload():
+    print session
     #check that user is logged in
     if 'username' not in session:
         flash("You must be logged in to use this feature")
@@ -105,7 +106,7 @@ def file_upload():
             return render_template('upload_json.html',src='',nm='', login_session=session.get('name', 'Not logged in'))
         
 
-"""Returns information on a news source, given NSID (news source ID)"""  
+"""Returns information on a news source, given NSID (news source ID)"""    
 @app.route('/source/<int:nsid>')
 def newsSource(nsid):
     conn = dbi.connect('credbase')
@@ -160,7 +161,7 @@ def searchNewsSources(search_term):
         return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))
     elif len(search_results) == 0:
         flash('Sorry, no news source with such name was found')
-    return render_template('searched_sources_page.html', page_title="Search results by source for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
+    return render_template('searched_sources_page.html', page_title="Search results for: '" + search_term + "'", search_results=search_results, login_session=session.get('name', 'Not logged in'))
 
 
 @app.route('/search-articles/', defaults={'search_term':''})    
@@ -177,10 +178,10 @@ def searchArticles(search_term):
             entry['title'] = unicode(entry['title'], errors='ignore')
             entry['name'] = unicode(entry['name'], errors='ignore')
             print entry['name']
-        return render_template('search_by_query.html', page_title="Search results by article for: '" + search_term + "'", articles=articles, login_session=session.get('name', 'Not logged in'))
+        return render_template('search_by_query.html', articles=articles, login_session=session.get('name', 'Not logged in'))
     #don't know why error happens but it does and we handle it here
     except TypeError: 
-        return render_template('search_by_query.html', page_title="Search results by article for: '" + search_term + "'", articles=articles, login_session=session.get('name', 'Not logged in'))
+        return render_template('search_by_query.html', articles=articles, login_session=session.get('name', 'Not logged in'))
     
 '''Allows logged-in user to update articles (ie members of search results)'''    
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
@@ -189,7 +190,7 @@ def updateArticle(sid):
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
-
+    
     conn = dbi.connect('credbase') 
     if request.method == "GET":
         articleInfo = dbi.getArticleBySid(conn, sid)
@@ -197,10 +198,10 @@ def updateArticle(sid):
         try:
             articleInfo['url'] = unicode(articleInfo['url'], errors='ignore')
             articleInfo['title'] = unicode(articleInfo['title'], errors='ignore')
-            return render_template('update_article.html', page_title="Update Article", articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
+            return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
         #handle case where already converted
         except TypeError:
-            return render_template('update_article.html', page_title="Update Article", articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
+            return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
         #if user wants to delete the article 
         if 'submitDelete' in request.form:
@@ -209,7 +210,7 @@ def updateArticle(sid):
                 dbi.deleteSearchResult(conn, sid)
                 flash("Article with SID: " + str(sid) + " was removed from the database")
                 articleInfo = dbi.getArticleBySid(conn, sid)
-                return render_template('update_article.html', page_title="Update Article", articleInfo=[], login_session=session.get('name', 'Not logged in'))
+                return render_template('update_article.html', articleInfo=[], login_session=session.get('name', 'Not logged in'))
         #if user wants to update elements of the article's entry
         if 'submitUpdate' in request.form:
             if 'update' in request.form['submitUpdate']: 
@@ -225,12 +226,10 @@ def updateArticle(sid):
                 if (original['title'] != request.form['title']) and (request.form['title'] != ""):
                      dbi.updateArticleTitle(conn, request.form['title'], sid)
                 articleInfo = dbi.getArticleBySid(conn, sid)
-                return render_template('update_article.html', page_title="Update Article", articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
+                return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
     articleInfo = dbi.getArticleBySid(conn, sid)
     flash("No changes made, please change appropriate values or delete item, as desired")
-    return render_template('update_article.html', page_title="Update Article", articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
-
-
+    return render_template('update_article.html', articleInfo=articleInfo, login_session=session.get('name', 'Not logged in'))
 
 '''Logged-in users can update a source, to fix inaccuracies.'''
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
@@ -239,68 +238,66 @@ def updateSource(nsid):
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
-    
+
     conn = dbi.connect('credbase') 
     if request.method == "GET":
-        print "METHOD WAS GET"
         sourceInfo = dbi.lookupNewsSource(conn, nsid)
-        # try:
-            #handing hex characters
-            # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-            # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-        #     return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-        # except TypeError:
-        return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-    
-    
+        #handing hex characters
+        try:
+            sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+            sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+            return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+        except TypeError:
+            return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     if request.method == "POST":
+        print "got inside post"
         #delete if user wants
-        if 'submitDelete' in request.form:
-            if 'delete' in request.form['submitDelete']: 
-                print "going to delete"
-                dbi.deleteSource(conn, nsid)
-                flash("Source with NSID: " + str(nsid) + " was removed from the database")
-                # sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-                # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-                return render_template('update_source.html', page_title="Update Source", sourceInfo=[], login_session=session.get('name', 'Not logged in'))
-        #otherwise update as appropriate
-        if 'submitUpdate' in request.form:
-            if 'update' in request.form['submitUpdate']: 
-                original = dbi.lookupNewsSource(conn, nsid)
-                print original
-                if (original['name'] != request.form['name']) and (request.form['name'] != ""):
-                     dbi.updateSourceName(conn, request.form['name'], nsid)
-                if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
-                     dbi.updateSourcePublisher(conn, request.form['publisher'], nsid)
-                #special case where may not have a mediatype value picked
-                if 'mediatype' in request.form:
-                    if (original['mediatype'] != request.form['mediatype']) and (request.form['mediatype'] != ""):
-                         print original['mediatype']
-                         print request.form['mediatype']
-                         dbi.updateSourceMediatype(conn, request.form['mediatype'], nsid)
-                if (original['location'] != request.form['location']) and (request.form['location'] != ""):
-                     dbi.updateSourceLocation(conn, request.form['location'], nsid)
-                if (original['editor'] != request.form['editor']) and (request.form['editor'] != ""):
-                     dbi.updateSourceEditor(conn, request.form['editor'], nsid)
-                if (original['url'] != request.form['url']) and (request.form['url'] != ""):
-                    dbi.updateSourceURL(conn, request.form['url'], nsid)
-                if (original['doe'] != request.form['doe']) and (request.form['doe'] != ""):
-                     dbi.updateSourceDOE(conn, request.form['doe'], nsid)
-                sourceInfo = dbi.lookupNewsSource(conn, nsid)
-                # try:
-                #     sourceInfo['url'] = unicode(sourceInfo['url'].decode, errors='ignore')
-                #     sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
-                #     return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-                # except TypeError:
-                return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-       
-                # return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
-    sourceInfo = dbi.lookupNewsSource(conn, nsid)
-    # sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
-    # sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+        if len(request.form) != 0:
+            if 'submitDelete' in request.form:
+                if 'delete' in request.form['submitDelete']: 
+                    print "going to delete"
+                    dbi.deleteSource(conn, nsid)
+                    flash("Source with NSID: " + str(nsid) + " was removed from the database")
+                    sourceInfo = dbi.lookupNewsSource(conn, nsid)
+                    return render_template('update_source.html', sourceInfo=[], login_session=session.get('name', 'Not logged in'))
+            #otherwise update as appropriate
+            if 'submitUpdate' in request.form:
+                if 'update' in request.form['submitUpdate']: 
+                    original = dbi.lookupNewsSource(conn, nsid)
+                    print original
+                    if (original['name'] != request.form['name']) and (request.form['name'] != ""):
+                         dbi.updateSourceName(conn, request.form['name'], nsid)
+                    if (original['publisher'] != request.form['publisher']) and (request.form['publisher'] != ""):
+                         dbi.updateSourcePublisher(conn, request.form['publisher'], nsid)
+                    #special case where may not have a mediatype value picked
+                    if 'mediatype' in request.form:
+                        if (original['mediatype'] != request.form['mediatype']) and (request.form['mediatype'] != ""):
+                             print original['mediatype']
+                             print request.form['mediatype']
+                             dbi.updateSourceMediatype(conn, request.form['mediatype'], nsid)
+                    if (original['location'] != request.form['location']) and (request.form['location'] != ""):
+                         dbi.updateSourceLocation(conn, request.form['location'], nsid)
+                    if (original['editor'] != request.form['editor']) and (request.form['editor'] != ""):
+                         dbi.updateSourceEditor(conn, request.form['editor'], nsid)
+                    if (original['url'] != request.form['url']) and (request.form['url'] != ""):
+                        dbi.updateSourceURL(conn, request.form['url'], nsid)
+                    if (original['doe'] != request.form['doe']) and (request.form['doe'] != ""):
+                         dbi.updateSourceDOE(conn, request.form['doe'], nsid)
+                    sourceInfo = dbi.lookupNewsSource(conn, nsid)
+                    return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+        
+        else:
+            print "got into else"
+            print dbi.lookupNewsSource(conn, nsid)
+            sourceInfo = dbi.lookupNewsSource(conn, nsid)
+            try:
+                sourceInfo['url'] = unicode(sourceInfo['url'], errors='ignore')
+                sourceInfo['name'] = unicode(sourceInfo['name'], errors='ignore')
+                return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+            except TypeError:
+                return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     flash("No changes made, please change appropriate values or delete item, as desired")
-    return render_template('update_source.html', page_title="Update Source", sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
+    return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session.get('name', 'Not logged in'))
     
 '''Logged-in users can add a new source.'''    
 @app.route('/add-source/', methods=['GET', 'POST'])
@@ -311,16 +308,17 @@ def addSource():
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
     conn = dbi.connect('credbase') 
     if request.method == "GET":
-        return render_template('add_source.html', page_title="Add Source", login_session=session.get('name', 'Not logged in'))
+        return render_template('add_source.html', login_session=session.get('name', 'Not logged in'))
     else:
         if 'submitSourceAdd' in request.form:
             print request.form
             if 'add' in request.form['submitSourceAdd']:
                 #ARR: this is ugly code, might be a better way to check for None values...
-                #I'll keep pondering
+                #I'll keep pondering 
                 if request.form['name'] == "":
+                    #only mandatory information for a source is a name
                     flash("Your source must have a name")
-                    return render_template('add_source.html', page_title="Add Source", login_session=session.get('name', 'Not logged in'))
+                    return render_template('add_source.html',login_session=session.get('name', 'Not logged in'))
                 else:
                     name = request.form['name']
                 if request.form['publisher'] == "":
@@ -350,7 +348,7 @@ def addSource():
                     doe = request.form['doe']
                 dbi.addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe)
                 flash("New news source " + name + " was successfully added.")
-                return render_template('add_source.html', page_title="Add Source", login_session=session.get('name', 'Not logged in'))
+                return render_template('add_source.html',login_session=session.get('name', 'Not logged in'))
                 
 # '''COMMENTED OUT - KHONZODA'''        
 # @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
