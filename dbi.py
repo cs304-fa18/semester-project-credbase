@@ -64,7 +64,8 @@ def getNewsSourceByURL(conn, url):
 
 
 def findArticlesByTopic(conn, title):   
-    """Extracts stories/search results that come from the given news source"""
+    """Given a database connection, extracts stories/search results that come 
+    from a news source with the provided title"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     titleLike = '%' + title + '%'
     print titleLike
@@ -76,21 +77,24 @@ def findArticlesByTopic(conn, title):
     
     
 def getSearchedNewsSources(conn, searchTerm):
-    """Searches the database for a news source that matches the name provided"""
+    """Given a database connection, searches the database for a news source 
+    that matches the name provided"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     pattern = '%' + searchTerm + '%'
     curs.execute('''select * from newsSource where name like %s''', [pattern])
     return curs.fetchall()
 
 def getArticleBySid(conn, sid):
-    """Searches the database for article with matching sid"""
+    """Given a database connection, searches the database for article 
+    with matching sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from searchresults where sid = %s''', [sid])
     return curs.fetchone()
 
 
 def deleteSearchResult(conn, sid):
-    """Allows user to delete search result from the database"""
+    """Given a database connection, allows user to delete search result 
+    from the database"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables searchresults write''')
@@ -99,7 +103,7 @@ def deleteSearchResult(conn, sid):
     
 
 def deleteSource(conn, nsid):
-    """Allows users to delete news source"""
+    """Given a database connection, allows users to delete news source"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables newsSource write''')
@@ -114,6 +118,8 @@ situation, but I chose to do so for clarity and to be explicit. I will
 look into cleaning this up for the beta version. -- Annabel
 ************************************************************************"""
 def updateArticleTitle(conn, title, sid):
+    """Given a database connection, and a new article title, updates the
+    corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables searchresults write''')
@@ -123,6 +129,8 @@ def updateArticleTitle(conn, title, sid):
         print(error)
         
 def updateArticleURL(conn, url, sid):
+    """Given a database connection, and a new url, updates the
+    corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables searchresults write''')
@@ -132,6 +140,8 @@ def updateArticleURL(conn, url, sid):
         print(error)
         
 def updateArticleResultDate(conn, date, sid):
+    """Given a database connection, and a new date, updates the
+    corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables searchresults write''')
@@ -141,6 +151,8 @@ def updateArticleResultDate(conn, date, sid):
         print(error)
 
 def updateArticleOriginQuery(conn, oq, sid):
+    """Given a database connection, and a origin query, updates the
+    corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables searchresults write''')
@@ -150,6 +162,8 @@ def updateArticleOriginQuery(conn, oq, sid):
         print(error)
 
 def updateSourceName(conn, name, nsid):
+    """Given a database connection, and a new source name, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -159,6 +173,8 @@ def updateSourceName(conn, name, nsid):
         print(error)
         
 def updateSourcePublisher(conn, publisher, nsid):
+    """Given a database connection, and a new publisher, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -168,6 +184,8 @@ def updateSourcePublisher(conn, publisher, nsid):
         print(error)
         
 def updateSourceMediatype(conn, mediatype, nsid):
+    """Given a database connection, and a new media type, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -177,6 +195,8 @@ def updateSourceMediatype(conn, mediatype, nsid):
         print(error)
         
 def updateSourceLocation(conn, location, nsid):
+    """Given a database connection, and a new location, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -186,6 +206,8 @@ def updateSourceLocation(conn, location, nsid):
         print(error)
  
 def updateSourceEditor(conn, editor, nsid):
+    """Given a database connection, and a new editor, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -195,6 +217,8 @@ def updateSourceEditor(conn, editor, nsid):
         print(error)     
         
 def updateSourceURL(conn, url, nsid):
+    """Given a database connection, and a new url, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -205,6 +229,8 @@ def updateSourceURL(conn, url, nsid):
         
 
 def updateSourceDOE(conn, doe, nsid):
+    """Given a database connection, and a new date of establishment, updates the
+    corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
         curs.execute('''lock tables newsSource write''')
@@ -222,18 +248,23 @@ def lookupUser(conn, uid):
     
     
 def getWatchedNewsSources(conn, uid): 
+    """Given database connection and the username returns all sources that are 
+    on the user's watchlist"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from watching where username = %s''', [uid])
     return curs.fetchall()
 
 
 def checkUserPass(conn, username):
+    """Given username returns a corresponding hashed value of the password"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select hashedPWD, name from user where username = %s''',
                      [username])
     return curs.fetchone()
     
 def addUser(conn, name, username, hashed):
+    """Given database connection username and the hashed value of the password, 
+    inserts a new user into the database"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables user write''')
     curs.execute('''select hashedPWD, name from user where username = %s''',
@@ -247,6 +278,8 @@ def addUser(conn, name, username, hashed):
     return True
 
 def addStory(conn, query, date, url, title, nsid):
+    """Given a database connection and infromation about SERP article inserts 
+    it into the database"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables searchresults write''')
     curs.execute('''insert into searchresults(title,originQuery,resultDate,url,nsid) values(%s,%s,%s,%s,%s)''',
@@ -254,6 +287,8 @@ def addStory(conn, query, date, url, title, nsid):
     curs.execute('''unlock tables''')
 
 def addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe):
+    """Takes database connection along with other information about the news source
+    and inserts it into the database"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables newsSource write''')
     curs.execute('''insert into newsSource(nsid,name,publisher,mediatype,location,editor,url,doe) values(%s,%s,%s,%s,%s,%s,%s,%s)''',
@@ -261,6 +296,8 @@ def addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe):
     curs.execute('''unlock tables''')
 
 def addMBF(conn, tupList):
+    """Helper function that takes a list of tuples that correspond to sources from
+    media bias fact-check list and inserts them into the database"""
     for entry in tupList:
         curs = conn.cursor(MySQLdb.cursors.DictCursor)
         curs.execute('''lock tables newsSource write''')

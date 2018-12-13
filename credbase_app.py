@@ -36,7 +36,7 @@ app.config['UPLOADS'] = 'uploads'
 """Home page"""
 @app.route('/')
 def home():
-    return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session.get('name', 'Not logged in'))
+    return render_template("home_page.html", page_title="Welcome to CredBase!", login_session=session.get('name', 'Not logged in'))
 
 """User information"""
 @app.route('/user/<username>')
@@ -51,6 +51,8 @@ def user(username):
             conn = dbi.connect('credbase')
             user_info = dbi.lookupUser(conn, user)
             sources = dbi.getWatchedNewsSources(conn, user)
+            for source in sources:
+                source['name'] = dbi.lookupNewsSource(conn, source['nsid'])['name']
             return render_template('user_page.html', page_title=user_info['name'], sources=sources, login_session=session.get('name', 'Not logged in'))
         else:
             flash('You are not logged in. Please login or join')
