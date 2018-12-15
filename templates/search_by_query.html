@@ -28,7 +28,7 @@
                 <td scope="row">{{article.originQuery}}</td>
                 <td scope="row">{{article.resultDate}}</td>
                 <form method="post" action="{{url_for('updateArticle', sid=article.sid)}}">
-                <td scope="row"><button class="update-article">Update</button></td>
+                <td scope="row"><button class="update-article btn btn-secondary">Update</button></td>
                 <form></form>
             </tr>
             {% endfor %}

@@ -305,6 +305,16 @@ def addMBF(conn, tupList):
                      [entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6],entry[7]])
         curs.execute('''unlock tables''')
 
+
+def addToWatchlist(conn, nsid, username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''lock tables watching write''')
+    curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, None])
+    curs.execute('''unlock tables''')
+    
+    
+
+
 """Lets user upload a new JSON file to the database"""
 def addFile(conn, nm, filename, query, date):
     #save file in json table for reference

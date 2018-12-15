@@ -21,7 +21,7 @@
                 <td scope="row"><a href="{{source.url}}">{{source.url}}</a></td>
                 <td scope="row">{{source.doe}}</td>
                 <form method="post" action="{{url_for('updateSource', nsid=source.nsid)}}">
-                <td scope="row"><button class="update-source">Update</button></td>
+                <td scope="row"><button class="update-source btn btn-secondary">Update</button></td>
                 <form></form>
             </tr>
             {% endfor %}
