@@ -277,6 +277,7 @@ def addUser(conn, name, username, hashed):
     curs.execute('''unlock tables''')
     return True
 
+
 def addStory(conn, query, date, url, title, nsid):
     """Given a database connection and infromation about SERP article inserts 
     it into the database"""
@@ -309,9 +310,13 @@ def addMBF(conn, tupList):
 def addToWatchlist(conn, nsid, username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables watching write''')
+    curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
+    if curs.fetchone() is not None:
+        return False
+        
     curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, None])
     curs.execute('''unlock tables''')
-    
+    return True
     
 
 

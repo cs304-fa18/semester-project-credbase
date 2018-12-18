@@ -30,7 +30,7 @@
             <form class="form-inline" id="logout" action= {{url_for('logout')}} method="post">
                 <div>
                     <!--<h4 class='col-sm col-form-label'> {{ login_session }} </h4>-->
-                    <a class='col-sm col-form-label navbar-brand text-dark' href="{{url_for('user',username=login_session['username'])}}">{{ login_session.get('name', 'Not logged in') }}</a>
+                    <a class='col-sm col-form-label navbar-brand text-dark' href="{{url_for('user',username=login_session.get('username', ' '))}}">{{ login_session.get('name', 'Not logged in') }}</a>
                 </div>
                 <button class="btn btn-primary" id="logout" type="submit" name="submit" value="logout">logout</button>
             </form>

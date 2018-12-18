@@ -10,7 +10,8 @@
                 <th scope="col">Source</th>
                 <th scope="col">URL</th>
                 <th scope="col">Date of Establishment</th>
-                <th scope="col">Update this Result</th>
+                <th scope="col">Update this source</th>
+                <th scope="col">Watch</th>
             </tr>
         </thead>
         <tbody>
@@ -22,35 +23,40 @@
                 <td scope="row">{{source.doe}}</td>
                 <form method="post" action="{{url_for('updateSource', nsid=source.nsid)}}">
                 <td scope="row"><button class="update-source btn btn-secondary">Update</button></td>
-                <form></form>
+                </form>
+                <!--<form method="post" action={{url_for('watchSource')}}>-->
+                <!--<td scope="row"><button id="watch-source" class="watch-source btn btn-secondary">Watch</button></td>    -->
+                <!--</form>-->
+                <td> <input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-<!--
-<article id="search-results">
-    <ul style="font-size:20px;">
-        {% for source in search_results %}
-        <li> 
-            <span> </span>
-            <a href="{{url_for('newsSource', nsid=source.nsid)}}">{{ source.name }}</a>
-            <button class="update-source">Update Source</button>
-        </li>
-        {% endfor %}
-    </ul>
-</article>
--->
 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 
 <script>
-    /*global $*/
-    $("#search-results").on("click", ".update-source", function(event){
-    var articleRow = $(this).closest("tr");
-    var nsid_id = articleRow.find(".nsid").text();
-    var fake = "{{url_for('updateSource', nsid=10)}}";
-    var real = fake.replace(/10/, nsid_id);
-    $.get(real);
-});
+    /* global $ */
+    // UPDATE WORKS WITHOUT THIS CODE
+//     $("#search-results").on("click", ".update-source", function(event){
+//     var articleRow = $(this).closest("tr");
+//     var nsid_id = articleRow.find(".nsid").text();
+//     var fake = "{{url_for('updateSource', nsid=10)}}";
+//     var real = fake.replace(/10/, nsid_id);
+//     $.get(real);
+// });
+
+    $("#search-results").on("click", "#watch-source", 
+    function(event) {
+        var nsid = $(this).closest("tr").attr('data-sid');
+        var username = "{{ login_session.get('username', ' ') }}";
+        var url = "{{ url_for('watchSource') }}";
+        console.log("user "+username+" added "+nsid+" to their watchlist");
+        $(this).val("Unwatch")
+        $.post(url, {'nsid':nsid})
+    }
+    );
 </script>
 
 

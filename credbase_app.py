@@ -41,6 +41,8 @@ def home():
 """User information"""
 @app.route('/user/<username>')
 def user(username):
+    if username == " ":
+        return redirect( url_for('home') )
     try:
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
@@ -60,7 +62,33 @@ def user(username):
     except Exception as err:
         flash('Error: '+str(err))
         return redirect( url_for('home') )
+        
 
+"""Returns information on a news source, given NSID (news source ID)"""    
+@app.route('/source/<int:nsid>')
+def newsSource(nsid):
+    conn = dbi.connect('credbase')
+    source = dbi.lookupNewsSource(conn, nsid)
+    if source == None:
+        flash("Sorry, no news source with this ID is in the database")
+        #We need to create not found page or something...
+        return redirect( url_for('home') )
+    else:
+        stories = dbi.getStoriesByNewsSource(conn, nsid)
+        #handle error that sometimes occurs, with unicode (some titles and URLs have hex characters in them)
+        try:
+            for story in stories:
+                story['url'] = unicode(story['url'], errors='ignore')
+                story['title'] = unicode(story['url'], errors='ignore')
+                story['originQuery'] = unicode(story['originQuery'], errors='ignore')
+                story['resultDate'] = unicode(story['resultDate'], errors='ignore')
+            return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, login_session=session)
+        #sometimes have errors turning into unicode if already converted
+        except TypeError: 
+            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session)
+
+
+##----------------# Route that handles json file uploads #---------------------#
 '''Allows a logged-in user to upload a new JSON file of search results'''
 @app.route('/upload/', methods=["GET", "POST"])
 def file_upload():
@@ -106,31 +134,10 @@ def file_upload():
         except Exception as err:
             flash('Upload failed {why}'.format(why=err))
             return render_template('upload_json.html',src='',nm='', login_session=session)
-        
+            
+            
 
-"""Returns information on a news source, given NSID (news source ID)"""    
-@app.route('/source/<int:nsid>')
-def newsSource(nsid):
-    conn = dbi.connect('credbase')
-    source = dbi.lookupNewsSource(conn, nsid)
-    if source == None:
-        flash("Sorry, no news source with this ID is in the database")
-        #We need to create not found page or something...
-        return redirect( url_for('home') )
-    else:
-        stories = dbi.getStoriesByNewsSource(conn, nsid)
-        #handle error that sometimes occurs, with unicode (some titles and URLs have hex characters in them)
-        try:
-            for story in stories:
-                story['url'] = unicode(story['url'], errors='ignore')
-                story['title'] = unicode(story['url'], errors='ignore')
-                story['originQuery'] = unicode(story['originQuery'], errors='ignore')
-                story['resultDate'] = unicode(story['resultDate'], errors='ignore')
-            return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, login_session=session)
-        #sometimes have errors turning into unicode if already converted
-        except TypeError: 
-            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session)
-
+##------------# Routes that handle different search results #-----------------##
 '''Search for a news source by name'''
 @app.route('/search/', methods=['GET', 'POST'])
 def search():
@@ -185,6 +192,8 @@ def searchArticles(search_term):
     except TypeError: 
         return render_template('search_by_query.html', articles=articles, login_session=session)
     
+    
+##-----------# Routes for updating & adding articles and sources #------------##    
 '''Allows logged-in user to update articles (ie members of search results)'''    
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
@@ -232,6 +241,8 @@ def updateArticle(sid):
     articleInfo = dbi.getArticleBySid(conn, sid)
     flash("No changes made, please change appropriate values or delete item, as desired")
     return render_template('update_article.html', articleInfo=articleInfo, login_session=session)
+
+
 
 '''Logged-in users can update a source, to fix inaccuracies.'''
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
@@ -287,7 +298,6 @@ def updateSource(nsid):
                          dbi.updateSourceDOE(conn, request.form['doe'], nsid)
                     sourceInfo = dbi.lookupNewsSource(conn, nsid)
                     return render_template('update_source.html', sourceInfo=sourceInfo, login_session=session)
-        
         else:
             print "got into else"
             print dbi.lookupNewsSource(conn, nsid)
@@ -354,15 +364,26 @@ def addSource():
                 flash("New news source " + name + " was successfully added.")
                 return render_template('add_source.html',login_session=session)
                 
-                
-# '''COMMENTED OUT - KHONZODA'''        
-# @app.route('/delete-article/<int:sid>', methods=['GET', 'POST'])
-# def deleteArticle(sid):
-#     '''Redirects to the page with pre-filled information to update for article'''
-#     conn = dbi.connect('credbase') 
-#     return render_template('delete_article.html')
 
-##-------------------# Pages for session/login management #-------------------##
+##---------------------# Route for watchlist management #---------------------##
+@app.route('/watch/', methods = ['POST'])
+def watchSource():
+    if 'username' not in session:
+        flash("You must be logged in to use this feature")
+        return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session)
+    
+    username = session['username']
+    nsid = request.form['nsid']
+    conn = dbi.connect('credbase')
+    if dbi.addToWatchlist(conn, nsid, username):
+        return jsonify({'nsid':nsid})
+    else:
+        flash("You are already watching this source")
+        # return redirect(request.referrer)
+        return redirect( url_for('home'))
+    
+                
+##-------------------# Routes for session/login management #------------------##
 @app.route('/login/', methods = ['POST'])
 def login():
     try:
@@ -416,6 +437,9 @@ def join():
         username = request.form['username']
         passwd1 = request.form['password1']
         passwd2 = request.form['password2']
+        if not username.isalnum():
+            flash('username should be alphanumeric')
+            return redirect( url_for('home'))
         if passwd1 != passwd2:
             flash('passwords do not match')
             return redirect( url_for('home'))
