@@ -99,18 +99,14 @@ def deleteSearchResult(conn, sid):
     from the database"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables searchresults write''')
     curs.execute ('''delete from searchresults where sid=%s''', [sid])
-    curs.execute('''unlock tables''')
     
 
 def deleteSource(conn, nsid):
     """Given a database connection, allows users to delete news source"""
     conn = connect("credbase")
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables newsSource write''')
     curs.execute ('''delete from newsSource where nsid=%s''', [nsid])
-    curs.execute('''unlock tables''')
     
 
 """*********************************************************************
@@ -124,9 +120,7 @@ def updateArticleTitle(conn, title, sid):
     corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set title = %s where sid = %s''', [title, sid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
@@ -135,9 +129,7 @@ def updateArticleURL(conn, url, sid):
     corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set url = %s where sid = %s''', [url, sid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
@@ -146,9 +138,7 @@ def updateArticleResultDate(conn, date, sid):
     corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set resultDate = %s where sid = %s''', [date, sid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
 
@@ -157,9 +147,7 @@ def updateArticleOriginQuery(conn, oq, sid):
     corresponding information of the article with the provided sid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables searchresults write''')
         curs.execute('''update searchresults set originQuery = %s where sid = %s''', [oq, sid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
 
@@ -168,9 +156,7 @@ def updateSourceName(conn, name, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set name = %s where nsid = %s''', [name, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
@@ -179,9 +165,7 @@ def updateSourcePublisher(conn, publisher, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set publisher = %s where nsid = %s''', [publisher, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
@@ -190,9 +174,7 @@ def updateSourceMediatype(conn, mediatype, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set mediatype = %s where nsid = %s''', [mediatype, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
         
@@ -201,9 +183,7 @@ def updateSourceLocation(conn, location, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set location = %s where nsid = %s''', [location, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)
  
@@ -212,9 +192,7 @@ def updateSourceEditor(conn, editor, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set editor = %s where nsid = %s''', [editor, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
         
@@ -223,9 +201,7 @@ def updateSourceURL(conn, url, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set url = %s where nsid = %s''', [url, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
         
@@ -235,9 +211,7 @@ def updateSourceDOE(conn, doe, nsid):
     corresponding information of the news source with the provided nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     try:
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''update newsSource set doe = %s where nsid = %s''', [doe, nsid])
-        curs.execute('''unlock tables''')
     except (MySQLdb.Error, MySQLdb.Warning) as error:
         print(error)     
 
@@ -275,6 +249,7 @@ def addUser(conn, name, username, hashed):
     curs.execute('''select hashedPWD, name from user where username = %s''',
                      [username])
     if curs.fetchone() is not None:
+        curs.execute('''unlock tables''')
         return False
     if curs.fetchone() == None:
         curs.execute('''insert into user(name,username,access,hashedPWD) values(%s,%s,'regular',%s)''',
@@ -287,29 +262,25 @@ def addStory(conn, query, date, url, title, nsid):
     """Given a database connection and infromation about SERP article inserts 
     it into the database"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables searchresults write''')
     curs.execute('''insert into searchresults(title,originQuery,resultDate,url,nsid) values(%s,%s,%s,%s,%s)''',
                      [title, query, date, url, nsid])
-    curs.execute('''unlock tables''')
+
 
 def addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe):
     """Takes database connection along with other information about the news source
     and inserts it into the database"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''lock tables newsSource write''')
     curs.execute('''insert into newsSource(nsid,name,publisher,mediatype,location,editor,url,doe) values(%s,%s,%s,%s,%s,%s,%s,%s)''',
                      [None, name, publisher, mediatype, location, editor, url, doe])
-    curs.execute('''unlock tables''')
+    
 
 def addMBF(conn, tupList):
     """Helper function that takes a list of tuples that correspond to sources from
     media bias fact-check list and inserts them into the database"""
     for entry in tupList:
         curs = conn.cursor(MySQLdb.cursors.DictCursor)
-        curs.execute('''lock tables newsSource write''')
         curs.execute('''insert into newsSource(nsid,name,publisher,mediatype,location,editor,url,doe) values (%s,%s,%s,%s,%s,%s,%s,%s)''',
                      [entry[0],entry[1],entry[2],entry[3],entry[4],entry[5],entry[6],entry[7]])
-        curs.execute('''unlock tables''')
 
 
 def checkInWatchlist(conn, nsid, username):
@@ -323,8 +294,8 @@ def addToWatchlist(conn, nsid, username):
     curs.execute('''lock tables watching write''')
     # curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
     if checkInWatchlist(conn, nsid, username) is not None:
+        curs.execute('''unlock tables''')
         return False
-        
     curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, serverdate.today()])
     curs.execute('''unlock tables''')
     return True
