@@ -1,34 +1,74 @@
 {% extends "base.html" %}
 {% block main %}
-<br>
 
+<br>
 <div class="container-fluid">
+    <div class='row'>
+    <div class="col-md-10">
     <h3>About the news source:</h3>
-    <div class="col-md-6">
-    <ul class="list-group">
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Date established:
-        <span class="badge badge-primary badge-pill">{{newsSource.doe}}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Type:
-        <span class="badge badge-primary badge-pill">{{newsSource.mediatype}}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Publisher:
-        <span class="badge badge-primary badge-pill">{{newsSource.publisher}}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Location:
-        <span class="badge badge-primary badge-pill">{{newsSource.location}}</span>
-      </li>
-      <li class="list-group-item d-flex justify-content-between align-items-center">
-        Editor:
-        <span class="badge badge-primary badge-pill">{{newsSource.editor}}</span>
-      </li>
-    </ul>
+    <div class="col-md-8">
+        <ul class="list-group">
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Date established:
+            <span class="badge badge-primary badge-pill">{{newsSource.doe}}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Type:
+            <span class="badge badge-primary badge-pill">{{newsSource.mediatype}}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Publisher:
+            <span class="badge badge-primary badge-pill">{{newsSource.publisher}}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Location:
+            <span class="badge badge-primary badge-pill">{{newsSource.location}}</span>
+          </li>
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            Editor:
+            <span class="badge badge-primary badge-pill">{{newsSource.editor}}</span>
+          </li>
+        </ul>
     </div>
+    </div>
+    <br>
+    <div class="col-md-2 float-right">
+        <div class="form-group row btn-block">
+            <form method="post" action="{{newsSource.url}}">
+                <button class="update-source btn btn-success btn-block">Go to {{newsSource.name}}</button>
+            </form>
+        </div>
+        <div class="form-group row btn-block">
+            <form method="post" action="{{url_for('updateSource', nsid=newsSource.nsid)}}">
+                <button class="update-source btn btn-secondary btn-block">Update</button>
+            </form>
+        </div>
+        <div class="form-group row btn-block">
+            <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">
+        </div>
+    </div>
+    </div>
+</div>    
+
+<!--<br>-->
+<!--<div class="row">-->
+<!--        <div class="form-group row">-->
+<!--            <form method="post" action="{{newsSource.url}}">-->
+<!--                <button class="update-source btn btn-success">Go to {{newsSource.name}}</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--        <div class="form-group row">-->
+<!--            <form method="post" action="{{url_for('updateSource', nsid=newsSource.nsid)}}">-->
+<!--                <button class="update-source btn btn-secondary">Update</button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--        <div class="form-group row">-->
+<!--            <input id="watch-source" class="btn btn-secondary" type="button" value="Watch">-->
+<!--        </div>-->
+<!--    </div>-->
+<!--</div>    -->
     
+    <!--</div>-->
     <br>
     
     <!--<p>Date established: {{newsSource.doe}}</p>-->

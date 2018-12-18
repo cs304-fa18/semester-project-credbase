@@ -34,22 +34,10 @@
             {% endfor %}
         </tbody>
     </table>
-    <!--
-    <ul>
-        {% for article in articles %}
-        <li>
-            <a href="{{url_for('newsSource', nsid=article.nsid)}}">{{ article.name }}</a> published: 
-            <a href="{{article.url}}">{{article.title}}</a> 
-            on {{article.resultDate}}, which showed up for the query: {{article.originQuery}}
-            
-        </li>
-        {% endfor %}
-    </ul>
-    -->
 </article>
 
 <script>
-
+//UPDATE WORKS WITHOUT THIS CODE
 $("#article-results").on("click", ".update-article", function(event){
     var articleRow = $(this).closest("tr");
     var sid_id = articleRow.find(".sid").text();

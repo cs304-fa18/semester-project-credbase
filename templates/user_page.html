@@ -17,7 +17,7 @@
             </thead>
             {% for item in sources %}
             <tr scope="row" data-id={{item.nsid}}>
-                <td scope="row" class="name">{{item.name}}</td>
+                <td scope="row" class="name"><a href="{{url_for('newsSource', nsid=item.nsid)}}">{{ item.name }}</a></td>
                 <td scope="row" class="date">{{item.addDate}}</td>
                 <!--<td scope="row"><button class="unwatch btn btn-secondary">Stop watching</button></td>-->
                 <td scope="row"> <input id="unwatch-source" class="btn btn-secondary" type="button" value="Stop watching"> </td>

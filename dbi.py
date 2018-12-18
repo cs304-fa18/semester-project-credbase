@@ -253,7 +253,10 @@ def getWatchedNewsSources(conn, uid):
     """Given database connection and the username returns all sources that are 
     on the user's watchlist"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from watching where username = %s''', [uid])
+    curs.execute('''select newsSource.name, watching.nsid, watching.addDate 
+                    from watching, newsSource 
+                    where username = %s and 
+                    watching.nsid = newsSource.nsid''', [uid])
     return curs.fetchall()
 
 

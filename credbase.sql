@@ -28,7 +28,7 @@ CREATE TABLE newsSource(
 CREATE TABLE searchresults (
     sid int auto_increment primary key,
     title varchar(100),
-    originQuery varchar(60),
+    originQuery varchar(200),
     resultDate date,
     url varchar(100),
     nsid int,
