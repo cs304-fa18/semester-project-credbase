@@ -49,39 +49,13 @@
             {% else %}
             <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">
             {% endif %}
-            <!--<input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">-->
         </div>
     </div>
     </div>
 </div>    
 
-<!--<br>-->
-<!--<div class="row">-->
-<!--        <div class="form-group row">-->
-<!--            <form method="post" action="{{newsSource.url}}">-->
-<!--                <button class="update-source btn btn-success">Go to {{newsSource.name}}</button>-->
-<!--            </form>-->
-<!--        </div>-->
-<!--        <div class="form-group row">-->
-<!--            <form method="post" action="{{url_for('updateSource', nsid=newsSource.nsid)}}">-->
-<!--                <button class="update-source btn btn-secondary">Update</button>-->
-<!--            </form>-->
-<!--        </div>-->
-<!--        <div class="form-group row">-->
-<!--            <input id="watch-source" class="btn btn-secondary" type="button" value="Watch">-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>    -->
-    
-    <!--</div>-->
     <br>
-    
-    <!--<p>Date established: {{newsSource.doe}}</p>-->
-    <!--<p>Type: {{newsSource.type}}</p>-->
-    <!--<p>Publisher: {{newsSource.publisher}}</p>-->
-    <!--<p>Location: {{newsSource.location}}</p>-->
-    <!--<p>Editor: {{newsSource.editor}}</p>-->
-    <!--<h3>Information about the news source:</h3>-->
+
     <h3>The news source writes about:</h3>
     <table class="table" id="stories">
         <thead>
@@ -101,9 +75,7 @@
             {% endfor %}
            
         </table>
-    <!--<p>{% for story in stories%}</p>-->
-    <!--<p>{{ story.title }}</p>-->
-    <!--<p>{% endfor %}</p>-->
+
     <h3>The news source is similar to:</h3>
     <article id="similar">
         <ul>
@@ -114,5 +86,25 @@
     </article>
 </div>
 
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+    /* global $ */
+    $("#watch-source").on("click", 
+    function(event) {
+        var nsid = "{{newsSource.nsid}}";
+        var username = "{{ login_session.get('username', ' ') }}";
+        if (username == ' ') {
+            $('#flashes').html("<p>You need to be logged in for this feature</p>");
+            return;
+        }
+        var url = "{{ url_for('watchSource') }}";
+        console.log("user "+username+" added "+nsid+" to their watchlist");
+        // $(this).val("Unwatch")
+        $(this).prop('disabled', true);
+        $.post(url, {'nsid':nsid})
+    }
+    );
+</script>
 {% endblock %}
 

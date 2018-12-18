@@ -28,9 +28,9 @@ CREATE TABLE newsSource(
 CREATE TABLE searchresults (
     sid int auto_increment primary key,
     title varchar(100),
-    originQuery varchar(200),
+    originQuery varchar(100),
     resultDate date,
-    url varchar(100),
+    url varchar(200),
     nsid int,
     foreign key (nsid) references newsSource(nsid) on delete set null on update cascade
     -- primary key (nsid, sid)
