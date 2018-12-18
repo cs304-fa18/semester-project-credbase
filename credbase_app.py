@@ -26,10 +26,6 @@ app = Flask(__name__)
 app.secret_key = "a very secret phrase"
 app.config['UPLOADS'] = 'uploads'
 
-#print mediaBias_intoNS.getTups()
-
-#workaround to load data into databse
-#dbi.addMBF(dbi.connect('credbase'), mediaBias_intoNS.getTups())
  
 """Home page"""
 @app.route('/')
@@ -211,7 +207,6 @@ def searchArticles(search_term):
 '''Allows logged-in user to update articles (ie members of search results)'''    
 @app.route('/update-article/<int:sid>', methods=['GET', 'POST'])
 def updateArticle(sid):
-    #NOT THREAD SAFE -- NEED TO FIX (should be fixed now - ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session)
@@ -261,7 +256,6 @@ def updateArticle(sid):
 '''Logged-in users can update a source, to fix inaccuracies.'''
 @app.route('/update-source/<int:nsid>', methods=['GET', 'POST'])
 def updateSource(nsid):
-    #NOT THREAD SAFE -- NEED TO FIX (should be fixed, ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session)
@@ -330,7 +324,6 @@ def updateSource(nsid):
 '''Logged-in users can add a new source.'''    
 @app.route('/add-source/', methods=['GET', 'POST'])
 def addSource():
-    #NOT THREAD SAFE -- NEED TO FIX (should be fixed, ARR 11/11)
     if 'username' not in session:
         flash("You must be logged in to use this feature")
         return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session)
