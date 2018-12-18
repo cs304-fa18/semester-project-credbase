@@ -341,42 +341,21 @@ def addSource():
         if 'submitSourceAdd' in request.form:
             print request.form
             if 'add' in request.form['submitSourceAdd']:
-                #ARR: this is ugly code, might be a better way to check for None values...
-                #I'll keep pondering 
-                if request.form['name'] == "":
-                    #only mandatory information for a source is a name
-                    flash("Your source must have a name")
+                name = request.form.get('name')
+                print name
+                if name != "":
+                    publisher = request.form.get('publisher')
+                    mediatype = request.form.get('mediatype')
+                    location = request.form.get('location')
+                    editor = request.form.get('editor')
+                    url = request.form.get('url')
+                    doe = request.form.get('doe')
+                    dbi.addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe)
+                    flash("New news source " + name + " was successfully added.")
                     return render_template('add_source.html',login_session=session)
                 else:
-                    name = request.form['name']
-                if request.form['publisher'] == "":
-                    publisher = None
-                else:
-                    publisher = request.form['publisher']
-                #have to handle mediatype specially bc radio button
-                if 'mediatype' not in request.form['submitSourceAdd']:
-                    mediatype = None
-                else:
-                    mediatype = request.form['mediatype']
-                if request.form['location'] == "":
-                    location = None
-                else:
-                    location = request.form['location']
-                if request.form['editor'] == "":
-                    editor = None
-                else:
-                    editor = request.form['editor']
-                if request.form['url'] == "":
-                    url = None
-                else:
-                    url = request.form['url']
-                if request.form['doe'] == "":
-                    doe = None
-                else:
-                    doe = request.form['doe']
-                dbi.addNewsSource(conn, name, publisher, mediatype, location, editor, url, doe)
-                flash("New news source " + name + " was successfully added.")
-                return render_template('add_source.html',login_session=session)
+                    flash("Your source must have a name")
+                    return render_template('add_source.html',login_session=session)
                 
 
 ##---------------------# Routes for watchlist management #--------------------##
