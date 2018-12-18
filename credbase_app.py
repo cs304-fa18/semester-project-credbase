@@ -51,8 +51,6 @@ def user(username):
             conn = dbi.connect('credbase')
             user_info = dbi.lookupUser(conn, user)
             sources = dbi.getWatchedNewsSources(conn, user)
-            for source in sources:
-                source['name'] = dbi.lookupNewsSource(conn, source['nsid'])['name']
             return render_template('user_page.html', page_title=user_info['name'], sources=sources, login_session=session)
         else:
             flash('You are not logged in. Please login or join')
@@ -67,11 +65,16 @@ def user(username):
 def newsSource(nsid):
     conn = dbi.connect('credbase')
     source = dbi.lookupNewsSource(conn, nsid)
+        
     if source == None:
         flash("Sorry, no news source with this ID is in the database")
         #We need to create not found page or something...
         return redirect( url_for('home') )
     else:
+        if 'username' in session and dbi.checkInWatchlist(conn, nsid, session['username']) is not None:
+            source['onWatchlist'] = True
+        else:
+            source['onWatchlist'] = False
         stories = dbi.getStoriesByNewsSource(conn, nsid)
         #handle error that sometimes occurs, with unicode (some titles and URLs have hex characters in them)
         try:
@@ -160,9 +163,22 @@ def searchNewsSources(search_term):
     of this news source. If there are none, it flashes the message"""
     conn = dbi.connect('credbase')
     search_results = dbi.getSearchedNewsSources(conn, search_term)
+    
+    #list of source nsid's that the current user is watching
+    if 'username' in session:
+        watched_sources = dbi.getWatchedNewsSources(conn, session['username'])
+        nsid_lst = [source['nsid'] for source in watched_sources]
+    else:
+        nsid_lst = []
+    
     for entry in search_results:
         print entry['name']
         entry['name'] = unicode(entry['name'], errors='ignore')
+        #sources that are on the watchlist are tagged
+        if entry['nsid'] in nsid_lst:
+            entry['onWatchlist'] = True
+        else:
+            entry['onWatchlist'] = None
         
     if len(search_results) == 1:
         return redirect(url_for('newsSource', nsid=search_results[0]['nsid']))

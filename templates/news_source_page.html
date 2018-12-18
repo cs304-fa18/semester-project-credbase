@@ -44,7 +44,12 @@
             </form>
         </div>
         <div class="form-group row btn-block">
+            {% if newsSource.onWatchlist %}
+            <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch" disabled>
+            {% else %}
             <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">
+            {% endif %}
+            <!--<input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">-->
         </div>
     </div>
     </div>

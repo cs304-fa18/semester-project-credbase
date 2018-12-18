@@ -312,11 +312,17 @@ def addMBF(conn, tupList):
         curs.execute('''unlock tables''')
 
 
+def checkInWatchlist(conn, nsid, username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
+    return curs.fetchone()
+
+
 def addToWatchlist(conn, nsid, username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables watching write''')
-    curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
-    if curs.fetchone() is not None:
+    # curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
+    if checkInWatchlist(conn, nsid, username) is not None:
         return False
         
     curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, serverdate.today()])

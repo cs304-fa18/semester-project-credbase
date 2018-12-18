@@ -27,7 +27,14 @@
                 <!--<form method="post" action={{url_for('watchSource')}}>-->
                 <!--<td scope="row"><button id="watch-source" class="watch-source btn btn-secondary">Watch</button></td>    -->
                 <!--</form>-->
-                <td scope="row"> <input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> </td>
+                <td scope="row"> 
+                    {% if source.onWatchlist %}
+                    <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch" disabled>
+                    {% else %}
+                    <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">
+                    {% endif %}
+                    <!--<input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> -->
+                </td>
             </tr>
             {% endfor %}
         </tbody>
