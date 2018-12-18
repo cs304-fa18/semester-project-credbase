@@ -51,6 +51,10 @@
     function(event) {
         var nsid = $(this).closest("tr").attr('data-sid');
         var username = "{{ login_session.get('username', ' ') }}";
+        if (username == ' ') {
+            $('#flashes').html("<p>You need to be logged in for this feature</p>");
+            return;
+        }
         var url = "{{ url_for('watchSource') }}";
         console.log("user "+username+" added "+nsid+" to their watchlist");
         // $(this).val("Unwatch")

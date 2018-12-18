@@ -20,8 +20,6 @@ import mediaBias_intoNS
 #import python files that do the lookup
 import dbi
 import bcrypt
-
-
  
 
 app = Flask(__name__)

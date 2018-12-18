@@ -17,6 +17,8 @@ import os
 import mediaBias_intoNS
 from urlparse import urlparse
 from pprint import pprint
+import serverdate
+
 
 def connect(db):
     """Establishes a connection with the
@@ -314,7 +316,7 @@ def addToWatchlist(conn, nsid, username):
     if curs.fetchone() is not None:
         return False
         
-    curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, None])
+    curs.execute('''insert into watching(nsid, username, addDate) values (%s,%s,%s)''', [nsid, username, serverdate.today()])
     curs.execute('''unlock tables''')
     return True
     
