@@ -19,13 +19,40 @@
             <tr scope="row" data-id={{item.nsid}}>
                 <td scope="row" class="name">{{item.name}}</td>
                 <td scope="row" class="date">{{item.addDate}}</td>
-                <td scope="row"><button class="unwatch btn btn-secondary">Stop watching</button></td>
+                <!--<td scope="row"><button class="unwatch btn btn-secondary">Stop watching</button></td>-->
+                <td scope="row"> <input id="unwatch-source" class="btn btn-secondary" type="button" value="Stop watching"> </td>
             </tr>
             {% endfor %}
            
         </table>
         
     </div>
-    
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+    /* global $ */
+    // UPDATE WORKS WITHOUT THIS CODE
+//     $("#search-results").on("click", ".update-source", function(event){
+//     var articleRow = $(this).closest("tr");
+//     var nsid_id = articleRow.find(".nsid").text();
+//     var fake = "{{url_for('updateSource', nsid=10)}}";
+//     var real = fake.replace(/10/, nsid_id);
+//     $.get(real);
+// });
+
+    $("#watchlist").on("click", "#unwatch-source", 
+    function(event) {
+        var nsid = $(this).closest("tr").attr('data-id');
+        var username = "{{ login_session.get('username', ' ') }}";
+        var url = "{{ url_for('unwatchSource') }}";
+        console.log("user "+username+" removed "+nsid+" from their watchlist");
+        // $(this).val("Unwatch")
+        $(this).prop('disabled', true);
+        $.post(url, {'nsid':nsid})
+    }
+    );
+</script>
+   
     
 {% endblock %}

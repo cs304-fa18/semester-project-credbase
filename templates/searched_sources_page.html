@@ -27,7 +27,7 @@
                 <!--<form method="post" action={{url_for('watchSource')}}>-->
                 <!--<td scope="row"><button id="watch-source" class="watch-source btn btn-secondary">Watch</button></td>    -->
                 <!--</form>-->
-                <td> <input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> </td>
+                <td scope="row"> <input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> </td>
             </tr>
             {% endfor %}
         </tbody>
@@ -53,7 +53,8 @@
         var username = "{{ login_session.get('username', ' ') }}";
         var url = "{{ url_for('watchSource') }}";
         console.log("user "+username+" added "+nsid+" to their watchlist");
-        $(this).val("Unwatch")
+        // $(this).val("Unwatch")
+        $(this).prop('disabled', true);
         $.post(url, {'nsid':nsid})
     }
     );

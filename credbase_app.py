@@ -365,7 +365,7 @@ def addSource():
                 return render_template('add_source.html',login_session=session)
                 
 
-##---------------------# Route for watchlist management #---------------------##
+##---------------------# Routes for watchlist management #--------------------##
 @app.route('/watch/', methods = ['POST'])
 def watchSource():
     if 'username' not in session:
@@ -381,6 +381,18 @@ def watchSource():
         flash("You are already watching this source")
         # return redirect(request.referrer)
         return redirect( url_for('home'))
+        
+@app.route('/unwatch/', methods = ['POST'])
+def unwatchSource():
+    if 'username' not in session:
+        flash("You must be logged in to use this feature")
+        return render_template("home_page.html", page_title="Welcome to CRED base!", login_session=session)
+    
+    username = session['username']
+    nsid = request.form['nsid']
+    conn = dbi.connect('credbase')
+    dbi.removeFromWatchlist(conn, nsid, username)
+    return jsonify({'nsid':nsid})
     
                 
 ##-------------------# Routes for session/login management #------------------##

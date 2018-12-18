@@ -318,8 +318,12 @@ def addToWatchlist(conn, nsid, username):
     curs.execute('''unlock tables''')
     return True
     
-
-
+    
+def removeFromWatchlist(conn, nsid, username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('''delete from watching where nsid=%s and username=%s''', [nsid, username])
+    
+    
 """Lets user upload a new JSON file to the database"""
 def addFile(conn, nm, filename, query, date):
     #save file in json table for reference
