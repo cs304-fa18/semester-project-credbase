@@ -79,8 +79,8 @@
     <h3>The news source is similar to:</h3>
     <article id="similar">
         <ul>
-            {% for source in search_results %}
-            <li><a href="{{source.url}}">{{ source.name }}</a></li>
+            {% for similar_source in similar_sources %}
+            <li><a href="{{url_for('newsSource', nsid=similar_source.similar_id)}}">{{ similar_source.name }}</a></li>
             {% endfor %}
         </ul>
     </article>

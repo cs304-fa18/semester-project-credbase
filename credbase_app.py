@@ -12,12 +12,11 @@ November, 2018
 
 from flask import (Flask, url_for, redirect, request, render_template, session, 
                    flash, jsonify)
-#files -- annabel
+
 from werkzeug import secure_filename
 import os
 import json
 import mediaBias_intoNS
-#import python files that do the lookup
 import dbi
 import bcrypt
  
@@ -41,6 +40,7 @@ def user(username):
         # don't trust the URL; it's only there for decoration
         if 'username' in session:
             user = session['username']
+            # user can access only their own account page
             if username != user:
                 flash('You are not logged in as this account. Switch accounts to proceed')
                 return redirect( url_for('home') )
@@ -64,7 +64,6 @@ def newsSource(nsid):
         
     if source == None:
         flash("Sorry, no news source with this ID is in the database")
-        #We need to create not found page or something...
         return redirect( url_for('home') )
     else:
         if 'username' in session and dbi.checkInWatchlist(conn, nsid, session['username']) is not None:
@@ -72,6 +71,7 @@ def newsSource(nsid):
         else:
             source['onWatchlist'] = False
         stories = dbi.getStoriesByNewsSource(conn, nsid)
+        similar = dbi.getSimilar(conn, nsid)
         #handle error that sometimes occurs, with unicode (some titles and URLs have hex characters in them)
         try:
             for story in stories:
@@ -79,10 +79,10 @@ def newsSource(nsid):
                 story['title'] = unicode(story['url'], errors='ignore')
                 story['originQuery'] = unicode(story['originQuery'], errors='ignore')
                 story['resultDate'] = unicode(story['resultDate'], errors='ignore')
-            return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, login_session=session)
+            return render_template('news_source_page.html', page_title=unicode(source['name'], errors='ignore'), newsSource=source, stories=stories, similar_sources=similar, login_session=session)
         #sometimes have errors turning into unicode if already converted
         except TypeError: 
-            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, login_session=session)
+            return render_template('news_source_page.html', page_title=source['name'], newsSource=source, stories=stories, similar_sources=similar, login_session=session)
 
 
 ##----------------# Route that handles json file uploads #---------------------#
@@ -100,8 +100,17 @@ def file_upload():
     else:
         #catch any upload errors
         try:
-            #gets CRED-ID
-            nm = int(request.form['nm']) # may throw error
+            #check Cred PIN, which is stored encrypted in users table associated with credAdmin account
+            pin = request.form['nm']
+            conn = dbi.connect('credbase')
+            result = dbi.checkUserPass(conn, 'credAdmin')
+            hashed = result['hashedPWD']
+            if bcrypt.hashpw(pin.encode('utf-8'),hashed.encode('utf-8')) != hashed:
+                flash('PIN that you entered is incorrect')
+                return render_template('upload_json.html',src='',nm='', login_session=session)
+            
+            #proceed with upload
+            nm = session['username']
             query = request.form['query']
             date = request.form['date']
             #make uploader give a valid date and query for use in database
@@ -119,11 +128,10 @@ def file_upload():
             else:
                 flash("Upload Error: file must be of type JSON")
             if validJSON:
-                filename = secure_filename('{}{}.{}'.format(nm, query, "json"))
+                filename = secure_filename('{}_{}.{}'.format(nm, query, "json"))
                 pathname = os.path.join(app.config['UPLOADS'],filename)
                 f.save(pathname)
                 flash('Upload successful')
-                conn = dbi.connect('credbase')
                 dbi.addFile(conn, nm, filename, query, date)
                 return render_template('upload_json.html',
                                        nm=filename, login_session=session)

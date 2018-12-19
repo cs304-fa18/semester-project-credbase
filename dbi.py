@@ -43,12 +43,18 @@ def lookupNewsSource(conn, nsid):
    
     
 def getSimilar(conn, nsid):
-    """Extracts a news source associated with the given ID. If no such
-    news source exists, None is returned"""
+    """Extracts news sources that are similar to one with the given nsid"""
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('''select * from similar where nsid1 = %s or nsid2 = %s''', [nsid, nsid])
-    return curs.fetchone()
-    
+    curs.execute('''(select similar.nsid2 as `similar_id`, newsSource.name
+                    from similar, newsSource 
+                    where similar.nsid1 = %s and newsSource.nsid=similar.nsid2)
+                    union
+                    (select similar.nsid1 as `similar_id`, newsSource.name
+                    from similar, newsSource 
+                    where nsid2 = %s and newsSource.nsid=similar.nsid1)''', 
+                    [nsid, nsid])
+    return curs.fetchall()
+   
    
 def getStoriesByNewsSource(conn, nsid):   
     """Extracts stories/search results that come from the given news source"""
