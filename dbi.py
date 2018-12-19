@@ -247,6 +247,7 @@ def checkUserPass(conn, username):
                      [username])
     return curs.fetchone()
     
+    
 def addUser(conn, name, username, hashed):
     """Given database connection username and the hashed value of the password, 
     inserts a new user into the database"""
@@ -290,12 +291,16 @@ def addMBF(conn, tupList):
 
 
 def checkInWatchlist(conn, nsid, username):
+    '''Given a database connection, checks whether the news source with the 
+    given nsid is in the watchlist of user with provided username'''
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
     return curs.fetchone()
 
 
 def addToWatchlist(conn, nsid, username):
+    '''Given a database connection, adds the news source with the given nsid
+    into the watchlist of the user with this username'''
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''lock tables watching write''')
     # curs.execute('''select * from watching where nsid=%s and username=%s''', [nsid, username])
@@ -308,12 +313,15 @@ def addToWatchlist(conn, nsid, username):
     
     
 def removeFromWatchlist(conn, nsid, username):
+    '''Given a database connection, removes a news source with the given nsid 
+    form the watchlist of the user with provided username'''
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('''delete from watching where nsid=%s and username=%s''', [nsid, username])
     
     
-"""Lets user upload a new JSON file to the database"""
+
 def addFile(conn, nm, filename, query, date):
+    """Lets user upload a new JSON file to the database"""
     #save file in json table for reference
     with open("uploads/"+filename) as data_file:
 	    data = json.load(data_file)
@@ -356,8 +364,8 @@ if __name__ == '__main__':
     #result = getWatchedNewsSources(conn, "123")
     #print(len(result))
     #THESE ARE ALREADY ADDED
-    # addFile(conn, 123, "Men women pay gap.json", "Men women pay gap", "2018-06-22")
-    # addFile(conn, 123, "female Phd.json", "female Phd", "2018-08-19")
-    # addFile(conn, 123, "Global warming real.json", "Global warming real", "2018-10-07")
-    # addFile(conn, 123, "Big data.json", "What is daca", "2018-10-07")
+    # addFile(conn, kumarova, "Men women pay gap.json", "Men women pay gap", "2018-06-22")
+    # addFile(conn, kumarova, "female Phd.json", "female Phd", "2018-08-19")
+    # addFile(conn, kumarova, "Global warming real.json", "Global warming real", "2018-10-07")
+    # addFile(conn, kumarova, "Big data.json", "What is daca", "2018-10-07")
     

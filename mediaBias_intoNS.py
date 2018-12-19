@@ -7,19 +7,8 @@ import pandas as pd
 import json
 from flask import (Flask, url_for, redirect, request, render_template, session, 
                    flash, jsonify)
+import dbi
 
-def connect(db):
-    """Establishes a connection with the
-    given database"""
-    # cnf = dbconn2.read_cnf()
-    # cnf['db'] = db
-    # conn = MySQLdb.connect(**cnf)
-    #I NEED TO FIGURE OUT HOW TO DO **CNF THING
-    conn = MySQLdb.connect(user='ubuntu', host='localhost',
-                          passwd='',
-                          db=db)
-    conn.autocommit(True)
-    return conn
 
 with open('uploads/mediabiasfactcheck_dct.json') as f:
     data = json.load(f)
@@ -28,7 +17,7 @@ tuplist = []
 def getTups():
     outF = open("MBFC_all.txt", "w")
     
-    conn = connect('credbase')
+    conn = dbi.connect('credbase')
     #substitute for NSID
     count = 0
     for entry in data:

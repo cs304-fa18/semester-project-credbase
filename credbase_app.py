@@ -451,16 +451,12 @@ def join():
             return redirect( url_for('home'))
         hashed = bcrypt.hashpw(passwd1.encode('utf-8'), bcrypt.gensalt())
         conn = dbi.connect('credbase')
-        result = dbi.checkUserPass(conn, username)
+        #tries adding a new username into the system
+        result = dbi.addUser(conn, name, username, hashed)
         
-        #NEED TO ADD THREAD SAFE MODIFICATIONS HERE
-        if result is not None:
-            #WE COULD USE AJAX HERE
-            flash('That username is taken')
+        if not result:
+            flash('This username is taken')
             return redirect(url_for('home'))
-        else:
-            #adds a new username into the system
-            dbi.addUser(conn, name, username, hashed)
         
         session['username'] = username
         session['name'] = name
