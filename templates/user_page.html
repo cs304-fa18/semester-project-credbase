@@ -32,24 +32,14 @@
 
 <script>
     /* global $ */
-    // UPDATE WORKS WITHOUT THIS CODE
-//     $("#search-results").on("click", ".update-source", function(event){
-//     var articleRow = $(this).closest("tr");
-//     var nsid_id = articleRow.find(".nsid").text();
-//     var fake = "{{url_for('updateSource', nsid=10)}}";
-//     var real = fake.replace(/10/, nsid_id);
-//     $.get(real);
-// });
-
     $("#watchlist").on("click", "#unwatch-source", 
     function(event) {
         var nsid = $(this).closest("tr").attr('data-id');
         var username = "{{ login_session.get('username', ' ') }}";
         var url = "{{ url_for('unwatchSource') }}";
         console.log("user "+username+" removed "+nsid+" from their watchlist");
-        // $(this).val("Unwatch")
         $(this).prop('disabled', true);
-        $.post(url, {'nsid':nsid})
+        $.post(url, {'nsid':nsid});
     }
     );
 </script>

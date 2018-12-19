@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block main %}
 <br>
-<!--
-<form id="title-search" method=POST action= {{url_for('searchArticles')}}>
-                <input id="query-term" placeholder="Search" name="query-term">
-                <button id="search-query" type="submit" name="submit" value="Search">Search</button>
-                </form>
--->
-
 <article id="query-results">
     <table class="table" id="article-results">
         <thead>
@@ -35,18 +28,5 @@
         </tbody>
     </table>
 </article>
-
-<script>
-//UPDATE WORKS WITHOUT THIS CODE
-// $("#article-results").on("click", ".update-article", function(event){
-//     var articleRow = $(this).closest("tr");
-//     var sid_id = articleRow.find(".sid").text();
-//     var fake = "{{url_for('updateArticle', sid=10)}}";
-//     var real = fake.replace(/10/, sid_id);
-//     $.get(real);
-// });
-    /*global $*/
-</script>
-
 
 {% endblock %}

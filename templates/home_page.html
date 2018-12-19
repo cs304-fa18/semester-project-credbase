@@ -6,11 +6,9 @@
 
 {% block main %}
 <br>
-    <!--<div class="row mb-2">-->
     <div class="container-fluid">
     <div class="row mb-2">
     <div class='col center-block'>
-    <!--<div class="center-block">-->
         <form id="loginform" action={{url_for('login')}} method="post">
             <h3>Login to CredBase</h3>
             <div class="form-group row">
@@ -25,11 +23,8 @@
                     <input type="password" name="password" required class="form-control">
                 </div>
             </div>
-            <!--<p><label>Username <input type="text" name="username" required pattern="^\w+$"></label></p>-->
-            <!--<p><label>Password <input type="password" name="password" required></label></p>-->
             <p><button class="btn btn-primary" type="submit">Submit</button></p>
         </form>
-    <!--</div>-->
     </div>
     
     <div class='col center-block'>
@@ -37,7 +32,6 @@
     </div>
     
     <div class='col center-block'>
-    <!--<div class="centerBlock">-->
         <form id="joinform" action={{url_for('join')}} method="post">
                 <h3>Join CredBase</h3>
                 <div class="form-group row">
@@ -65,15 +59,10 @@
                     </div>
                 </div>
                 
-                <!--<p><label>Name </label><input type="text" name="name"></p>-->
-                <!--<p><label>Username </label><input type="text" name="username" required pattern="^\w+$"></p>-->
-                <!--<p><label>Password </label><input type="password" name="password1" required></p>-->
-                <!--<p><label>Password again </label><input type="password" name="password2" required></p>-->
                 <p><button class="btn btn-primary" type="submit">Submit</button></p>
                 
                 
         </form>
-    <!--</div>-->
     </div>
     </div>
     </div>

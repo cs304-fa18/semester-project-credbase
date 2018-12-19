@@ -33,7 +33,6 @@
                     {% else %}
                     <input id="watch-source" class="btn btn-secondary btn-block" type="button" value="Watch">
                     {% endif %}
-                    <!--<input id="watch-source" class="btn btn-secondary" type="button" value="Watch"> -->
                 </td>
             </tr>
             {% endfor %}
@@ -45,15 +44,7 @@
 
 <script>
     /* global $ */
-    // UPDATE WORKS WITHOUT THIS CODE
-//     $("#search-results").on("click", ".update-source", function(event){
-//     var articleRow = $(this).closest("tr");
-//     var nsid_id = articleRow.find(".nsid").text();
-//     var fake = "{{url_for('updateSource', nsid=10)}}";
-//     var real = fake.replace(/10/, nsid_id);
-//     $.get(real);
-// });
-
+    //Ajax for watch button
     $("#search-results").on("click", "#watch-source", 
     function(event) {
         var nsid = $(this).closest("tr").attr('data-sid');
@@ -64,9 +55,8 @@
         }
         var url = "{{ url_for('watchSource') }}";
         console.log("user "+username+" added "+nsid+" to their watchlist");
-        // $(this).val("Unwatch")
         $(this).prop('disabled', true);
-        $.post(url, {'nsid':nsid})
+        $.post(url, {'nsid':nsid});
     }
     );
 </script>
