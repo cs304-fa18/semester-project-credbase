@@ -14,7 +14,7 @@ import os
 #import dbconn2
 
 #annabel testing:
-import mediaBias_intoNS
+#import mediaBias_intoNS
 from urlparse import urlparse
 from pprint import pprint
 import serverdate
